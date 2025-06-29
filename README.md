@@ -1,0 +1,1 @@
+# Shopping-extension-companion
