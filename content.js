@@ -1,188 +1,193 @@
 /**
- * Content Script - Page Information Extractor
- * Extracts titles and prices from web pages with intelligent fallback strategies
+ * Content Script - Simple and Reliable Page Information Extractor
+ * Handles page title and price extraction with improved timeout handling
  */
 
-class PageInfoExtractor {
+class SimplePageExtractor {
     constructor() {
-        this.loadingState = {
-            domLoaded: document.readyState === 'complete',
-            windowLoaded: false,
-            dynamicContentReady: false
-        };
-        
+        this.isReady = false;
         this.init();
     }
     
     init() {
-        this.setupEventListeners();
-        this.trackLoadingState();
+        console.log('🚀 [Content] Initializing page extractor for:', window.location.href);
+        
+        this.setupMessageListener();
+        this.waitForPageReady();
     }
     
-    setupEventListeners() {
-        // Listen for messages from popup
+    setupMessageListener() {
+        // Remove any existing listeners first
+        if (chrome.runtime.onMessage.hasListeners()) {
+            chrome.runtime.onMessage.removeListener(this.handleMessage);
+        }
+        
+        // Add fresh listener
         chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+            console.log('📨 [Content] Received message:', request);
             return this.handleMessage(request, sender, sendResponse);
         });
+        
+        console.log('👂 [Content] Message listener set up');
     }
     
-    trackLoadingState() {
-        // Track DOM ready state
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', () => {
-                this.loadingState.domLoaded = true;
-            });
-        }
-        
-        // Track window load state
-        if (document.readyState !== 'complete') {
-            window.addEventListener('load', () => {
-                this.loadingState.windowLoaded = true;
-            });
+    waitForPageReady() {
+        // Simple approach: wait for DOM to be ready, then wait a bit more for dynamic content
+        if (document.readyState === 'complete') {
+            this.onPageReady();
         } else {
-            this.loadingState.windowLoaded = true;
+            window.addEventListener('load', () => this.onPageReady());
         }
+    }
+    
+    onPageReady() {
+        console.log('✅ [Content] Page ready, waiting for dynamic content...');
         
-        // Set dynamic content ready after a delay
+        // Wait a short time for dynamic content to load
         setTimeout(() => {
-            this.loadingState.dynamicContentReady = true;
-        }, ExtensionConfig.timing.dynamicContentDelay);
+            this.isReady = true;
+            console.log('🎯 [Content] Extractor fully ready');
+        }, 2000); // 2 seconds should be enough for most dynamic content
     }
     
     handleMessage(request, sender, sendResponse) {
-        switch (request.action) {
-            case 'getPageTitle':
-                sendResponse({
-                    title: this.extractTitle(),
-                    url: window.location.href
-                });
-                return true;
-                
-            case 'getProductPrice':
-                sendResponse({
-                    price: this.extractPrice(),
-                    url: window.location.href
-                });
-                return true;
-                
-            case 'getPageInfo':
-                const pageInfo = this.extractPageInfo();
-                sendResponse(pageInfo);
-                return true;
-                
-            default:
-                return false;
+        console.log('🔄 [Content] Processing message:', request.action);
+        
+        try {
+            switch (request.action) {
+                case 'ping':
+                    // Simple health check
+                    sendResponse({ status: 'ok', ready: this.isReady });
+                    return true;
+                    
+                case 'getPageTitle':
+                    const title = this.extractTitle();
+                    console.log('📄 [Content] Extracted title:', title);
+                    sendResponse({
+                        title: title,
+                        url: window.location.href
+                    });
+                    return true;
+                    
+                case 'getProductPrice':
+                    const price = this.extractPrice();
+                    console.log('💰 [Content] Extracted price:', price);
+                    sendResponse({
+                        price: price,
+                        url: window.location.href
+                    });
+                    return true;
+                    
+                case 'getPageInfo':
+                    const pageInfo = this.extractPageInfo();
+                    console.log('📋 [Content] Extracted page info:', pageInfo);
+                    sendResponse(pageInfo);
+                    return true;
+                    
+                default:
+                    console.log('❓ [Content] Unknown action:', request.action);
+                    sendResponse({ error: 'Unknown action' });
+                    return false;
+            }
+        } catch (error) {
+            console.error('❌ [Content] Error handling message:', error);
+            sendResponse({ error: error.message });
+            return false;
         }
     }
     
     extractPageInfo() {
         const title = this.extractTitle();
-        let price = this.extractPrice();
-        
-        // Provide loading state feedback
-        if (price === ExtensionConfig.messages.notFound.price && !this.loadingState.dynamicContentReady) {
-            if (!this.loadingState.windowLoaded) {
-                price = ExtensionConfig.messages.loading.pageLoading;
-            } else if (!this.loadingState.dynamicContentReady) {
-                price = ExtensionConfig.messages.loading.dynamicContent;
-            }
-        }
+        const price = this.extractPrice();
         
         return {
-            title,
-            price,
+            title: title,
+            price: price,
             url: window.location.href,
             domain: window.location.hostname,
-            protocol: window.location.protocol,
-            loadingState: { ...this.loadingState }
+            ready: this.isReady,
+            timestamp: new Date().toISOString()
         };
     }
     
     extractTitle() {
+        // Simple, reliable title extraction
         const strategies = [
             () => document.title,
-            () => this.getElementText('title'),
+            () => this.getTextContent('title'),
             () => this.getMetaContent('meta[property="og:title"]'),
             () => this.getMetaContent('meta[name="title"]'),
-            () => this.getElementText('h1')
+            () => this.getTextContent('h1')
         ];
         
         for (const strategy of strategies) {
-            const title = strategy();
-            if (title && title.trim()) {
-                return title.trim();
+            try {
+                const title = strategy();
+                if (title && title.trim() && title.trim() !== '') {
+                    return title.trim();
+                }
+            } catch (error) {
+                console.log('⚠️ [Content] Title strategy failed:', error.message);
+                continue;
             }
         }
         
-        return ExtensionConfig.messages.notFound.title;
+        return 'No title found';
     }
     
     extractPrice() {
-        // Try loaded price first (avoids loading placeholders)
-        const loadedPrice = this.extractLoadedPrice();
-        if (loadedPrice && loadedPrice !== ExtensionConfig.messages.notFound.price) {
-            return loadedPrice;
-        }
+        console.log('💰 [Content] Starting price extraction...');
         
-        // Fallback to standard extraction
-        return this.extractStandardPrice();
-    }
-    
-    extractLoadedPrice() {
-        const allSelectors = this.getAllPriceSelectors();
+        // Try different extraction methods
+        const methods = [
+            () => this.extractPriceFromSelectors(),
+            () => this.extractPriceFromStructuredData(),
+            () => this.extractPriceFromMeta(),
+            () => this.extractPriceFromText()
+        ];
         
-        for (const selector of allSelectors) {
-            const elements = document.querySelectorAll(selector);
-            
-            for (const element of elements) {
-                if (this.hasLoadingIndicators(element)) {
-                    continue;
+        for (const method of methods) {
+            try {
+                const price = method();
+                if (price && this.isValidPrice(price)) {
+                    console.log('✅ [Content] Found valid price:', price);
+                    return price;
                 }
-                
-                const priceText = this.getElementPriceText(element);
-                const cleanedPrice = this.cleanPriceText(priceText);
-                
-                if (cleanedPrice && this.isValidLoadedPrice(cleanedPrice, priceText)) {
-                    return cleanedPrice;
-                }
+            } catch (error) {
+                console.log('⚠️ [Content] Price method failed:', error.message);
+                continue;
             }
         }
         
-        return null;
-    }
-    
-    extractStandardPrice() {
-        // Try DOM selectors
-        const selectorPrice = this.extractPriceFromSelectors();
-        if (selectorPrice) return selectorPrice;
-        
-        // Try structured data
-        const jsonLdPrice = this.extractPriceFromJsonLd();
-        if (jsonLdPrice) return jsonLdPrice;
-        
-        // Try meta tags
-        const metaPrice = this.extractPriceFromMetaTags();
-        if (metaPrice) return metaPrice;
-        
-        // Try page text search
-        const textPrice = this.extractPriceFromPageText();
-        if (textPrice) return textPrice;
-        
-        return ExtensionConfig.messages.notFound.price;
+        console.log('❌ [Content] No price found');
+        return 'No price found';
     }
     
     extractPriceFromSelectors() {
-        const allSelectors = this.getAllPriceSelectors();
+        // Common price selectors for major e-commerce sites
+        const selectors = [
+            // Amazon
+            '.a-price-whole', '.a-price .a-offscreen', '#priceblock_dealprice', '#priceblock_ourprice',
+            // eBay
+            '.u-flL.condText', '.u-flL .notranslate', '.display-price',
+            // Shopify
+            '.price', '.money', '.product-price', '.current-price',
+            // WooCommerce
+            '.woocommerce-Price-amount', '.price ins .amount', '.price .amount',
+            // Generic
+            '[class*="price"]', '[id*="price"]', '[data-price]', '.cost', '.value'
+        ];
         
-        for (const selector of allSelectors) {
+        for (const selector of selectors) {
             const elements = document.querySelectorAll(selector);
             
             for (const element of elements) {
-                const priceText = this.getElementPriceText(element);
-                const cleanedPrice = this.cleanPriceText(priceText);
+                if (!this.isElementVisible(element)) continue;
                 
-                if (cleanedPrice) {
-                    return cleanedPrice;
+                const text = this.getElementText(element);
+                if (text && this.containsPrice(text)) {
+                    const price = this.cleanPriceText(text);
+                    if (price) return price;
                 }
             }
         }
@@ -190,16 +195,15 @@ class PageInfoExtractor {
         return null;
     }
     
-    extractPriceFromJsonLd() {
+    extractPriceFromStructuredData() {
         const scripts = document.querySelectorAll('script[type="application/ld+json"]');
         
         for (const script of scripts) {
             try {
                 const data = JSON.parse(script.textContent);
-                const price = this.findPriceInJsonData(data);
+                const price = this.findPriceInData(data);
                 if (price) return price;
             } catch (error) {
-                // Invalid JSON, continue to next script
                 continue;
             }
         }
@@ -207,30 +211,38 @@ class PageInfoExtractor {
         return null;
     }
     
-    extractPriceFromMetaTags() {
-        const metaSelectors = ExtensionConfig.priceExtraction.metaSelectors;
+    extractPriceFromMeta() {
+        const metaSelectors = [
+            'meta[property="product:price:amount"]',
+            'meta[property="og:price:amount"]',
+            'meta[name="price"]',
+            'meta[name="twitter:data1"]'
+        ];
         
         for (const selector of metaSelectors) {
-            const price = this.getMetaContent(selector);
-            if (price) {
-                const cleanedPrice = this.cleanPriceText(price);
-                if (cleanedPrice) return cleanedPrice;
+            const content = this.getMetaContent(selector);
+            if (content && this.containsPrice(content)) {
+                const price = this.cleanPriceText(content);
+                if (price) return price;
             }
         }
         
         return null;
     }
     
-    extractPriceFromPageText() {
-        const textContent = document.body.textContent || '';
-        const lines = textContent.split('\n')
-            .map(line => line.trim())
-            .filter(line => line.length > 0 && line.length < 100);
+    extractPriceFromText() {
+        // Look for price patterns in page text
+        const pricePattern = /[\$€£¥₹₽]\s*\d+(?:[.,]\d{2})?|\d+(?:[.,]\d{2})?\s*[\$€£¥₹₽]/g;
+        const pageText = document.body.textContent || '';
+        const matches = pageText.match(pricePattern);
         
-        for (const line of lines) {
-            const cleanedPrice = this.cleanPriceText(line);
-            if (cleanedPrice && this.isPriceRealistic(cleanedPrice)) {
-                return cleanedPrice;
+        if (matches && matches.length > 0) {
+            // Return the first reasonable price found
+            for (const match of matches) {
+                const price = this.cleanPriceText(match);
+                if (price && this.isPriceRealistic(price)) {
+                    return price;
+                }
             }
         }
         
@@ -238,116 +250,123 @@ class PageInfoExtractor {
     }
     
     // Helper methods
-    getAllPriceSelectors() {
-        const selectors = ExtensionConfig.priceExtraction.selectors;
-        return [
-            ...selectors.generic,
-            ...selectors.amazon,
-            ...selectors.ebay,
-            ...selectors.shopify,
-            ...selectors.woocommerce,
-            ...selectors.common
-        ];
-    }
-    
-    getElementText(selector) {
-        const element = document.querySelector(selector);
-        return element?.textContent || '';
+    getTextContent(selector) {
+        try {
+            const element = document.querySelector(selector);
+            return element ? element.textContent.trim() : null;
+        } catch (error) {
+            return null;
+        }
     }
     
     getMetaContent(selector) {
-        const element = document.querySelector(selector);
-        return element?.getAttribute('content') || '';
+        try {
+            const meta = document.querySelector(selector);
+            return meta ? meta.getAttribute('content') : null;
+        } catch (error) {
+            return null;
+        }
     }
     
-    getElementPriceText(element) {
+    getElementText(element) {
+        if (!element) return null;
+        
+        // Try different text properties
         return element.textContent || 
-               element.getAttribute('content') || 
-               element.value || '';
+               element.innerText || 
+               element.getAttribute('data-price') || 
+               element.getAttribute('value') || 
+               null;
+    }
+    
+    isElementVisible(element) {
+        if (!element) return false;
+        
+        const style = window.getComputedStyle(element);
+        return style.display !== 'none' && 
+               style.visibility !== 'hidden' && 
+               style.opacity !== '0' &&
+               element.offsetWidth > 0 &&
+               element.offsetHeight > 0;
+    }
+    
+    containsPrice(text) {
+        if (!text) return false;
+        return /[\$€£¥₹₽]|\d+[.,]\d{2}/.test(text);
     }
     
     cleanPriceText(text) {
-        return ExtensionUtils.text.extractPrice(text);
-    }
-    
-    hasLoadingIndicators(element) {
-        let currentElement = element;
-        let levels = 0;
+        if (!text) return null;
         
-        while (currentElement && levels < 3) {
-            const className = currentElement.className || '';
-            const id = currentElement.id || '';
-            const textContent = currentElement.textContent || '';
-            
-            const indicators = ExtensionConfig.priceExtraction.loadingIndicators;
-            for (const indicator of indicators) {
-                if (className.toLowerCase().includes(indicator) ||
-                    id.toLowerCase().includes(indicator) ||
-                    textContent.toLowerCase().includes(indicator)) {
-                    return true;
-                }
-            }
-            
-            currentElement = currentElement.parentElement;
-            levels++;
+        // Extract price using regex
+        const priceMatch = text.match(/([\$€£¥₹₽]\s*\d+(?:[.,]\d{2})?|\d+(?:[.,]\d{2})?\s*[\$€£¥₹₽])/);
+        
+        if (priceMatch) {
+            return priceMatch[1].trim();
         }
         
-        return false;
+        return null;
     }
     
-    isValidLoadedPrice(cleanedPrice, originalText) {
-        const lowerOriginal = originalText.toLowerCase();
-        const config = ExtensionConfig.priceExtraction;
+    isValidPrice(price) {
+        if (!price || typeof price !== 'string') return false;
         
-        // Check for invalid text patterns
-        if (ExtensionUtils.text.containsAny(lowerOriginal, config.invalidTexts)) {
+        // Check if it looks like a price
+        if (!this.containsPrice(price)) return false;
+        
+        // Avoid loading indicators
+        if (price.includes('Loading') || 
+            price.includes('loading') || 
+            price.includes('...') ||
+            price.includes('--')) {
             return false;
         }
         
-        // Check minimum digit count
-        if (cleanedPrice.replace(/[^\d]/g, '').length < config.validation.minDigits) {
-            return false;
-        }
-        
-        // Check for unrealistic prices
-        return ExtensionUtils.price.isRealistic(cleanedPrice);
+        return true;
     }
     
     isPriceRealistic(price) {
-        return ExtensionUtils.price.isRealistic(price);
+        if (!price) return false;
+        
+        const numericValue = parseFloat(price.replace(/[^\d.]/g, ''));
+        return numericValue > 0 && numericValue < 100000; // Between $0 and $100,000
     }
     
-    findPriceInJsonData(data) {
-        if (!data || typeof data !== 'object') return null;
+    findPriceInData(data) {
+        if (!data) return null;
         
-        // Direct price properties
-        if (data.price !== undefined) {
-            return String(data.price);
+        // Handle arrays
+        if (Array.isArray(data)) {
+            for (const item of data) {
+                const price = this.findPriceInData(item);
+                if (price) return price;
+            }
+            return null;
         }
         
-        if (data.lowPrice !== undefined) {
-            return String(data.lowPrice);
-        }
-        
-        // Offers array
-        if (data.offers && Array.isArray(data.offers)) {
-            for (const offer of data.offers) {
-                if (offer.price !== undefined) {
-                    return String(offer.price);
+        // Handle objects
+        if (typeof data === 'object') {
+            // Look for common price fields
+            const priceFields = ['price', 'lowPrice', 'highPrice', 'amount', 'value'];
+            
+            for (const field of priceFields) {
+                if (data[field]) {
+                    const price = this.cleanPriceText(String(data[field]));
+                    if (price) return price;
                 }
             }
-        }
-        
-        // Single offer object
-        if (data.offers && data.offers.price !== undefined) {
-            return String(data.offers.price);
-        }
-        
-        // Recursive search
-        for (const key in data) {
-            if (data.hasOwnProperty(key) && typeof data[key] === 'object') {
-                const result = this.findPriceInJsonData(data[key]);
-                if (result) return result;
+            
+            // Look for offers
+            if (data.offers) {
+                return this.findPriceInData(data.offers);
+            }
+            
+            // Recursively search other fields
+            for (const key in data) {
+                if (typeof data[key] === 'object') {
+                    const price = this.findPriceInData(data[key]);
+                    if (price) return price;
+                }
             }
         }
         
@@ -355,14 +374,22 @@ class PageInfoExtractor {
     }
 }
 
-// Initialize the page info extractor
-const pageInfoExtractor = new PageInfoExtractor();
+// Initialize the extractor
+let pageExtractor = null;
 
-// Legacy function exports for backward compatibility
+// Initialize when script loads
+try {
+    pageExtractor = new SimplePageExtractor();
+    console.log('✅ [Content] Simple page extractor initialized');
+} catch (error) {
+    console.error('❌ [Content] Failed to initialize extractor:', error);
+}
+
+// Legacy functions for backward compatibility
 function getPageTitle() {
-    return pageInfoExtractor.extractTitle();
+    return pageExtractor ? pageExtractor.extractTitle() : 'No title found';
 }
 
 function getProductPrice() {
-    return pageInfoExtractor.extractPrice();
+    return pageExtractor ? pageExtractor.extractPrice() : 'No price found';
 } 

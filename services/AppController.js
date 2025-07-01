@@ -7,9 +7,21 @@ class AppController {
     constructor() {
         this.services = new Map();
         this.isInitialized = false;
-        this.errorHandler = this.createErrorHandler();
-        
-        this.init();
+        this.errorHandler = {
+            handle: (error, context = 'Unknown error') => {
+                console.error(`[AppController] ${context}:`, error);
+                
+                // Emit error event for other components
+                this.emit('app:error', { error, context });
+                
+                // Log to performance manager if available
+                const performance = this.services.get('performance');
+                if (performance) {
+                    console.log('Error occurred, triggering memory optimization');
+                    performance.optimizeMemory();
+                }
+            }
+        };
     }
     
     async init() {
@@ -17,6 +29,7 @@ class AppController {
             await this.initializeServices();
             await this.setupServiceCommunication();
             await this.bindEventHandlers();
+            await this.initializeUI();
             
             this.isInitialized = true;
             this.emit('app:initialized');
@@ -82,6 +95,24 @@ class AppController {
         ui.handleExportList = () => this.handleExportList();
         ui.handleVisitProduct = (url) => this.handleVisitProduct(url);
         ui.handleRemoveProduct = (productId) => this.handleRemoveProduct(productId);
+    }
+    
+    /**
+     * Initialize UI with saved data
+     */
+    async initializeUI() {
+        const storage = this.services.get('storage');
+        const ui = this.services.get('ui');
+        
+        try {
+            // Load saved products and update UI
+            const products = await storage.getProducts();
+            await ui.updateProductList(products);
+            
+            console.log(`✅ Loaded ${products.length} saved products`);
+        } catch (error) {
+            this.errorHandler.handle(error, 'Failed to initialize UI with saved data');
+        }
     }
     
     /**
@@ -159,7 +190,7 @@ class AppController {
         try {
             const currentPageInfo = ui.getState('currentPageInfo');
             
-            if (!currentPageInfo || !storage.isValidProduct(currentPageInfo)) {
+            if (!currentPageInfo || !ExtensionUtils.storage.isValidProduct(currentPageInfo)) {
                 ui.showError('No valid product information to add');
                 return;
             }
@@ -186,6 +217,224 @@ class AppController {
             this.errorHandler.handle(error, 'Failed to add product to list');
             ui.showError(`Error adding to list: ${error.message}`);
         }
+    }
+    
+    /**
+     * Handle clearing all products
+     */
+    async handleClearList() {
+        const ui = this.services.get('ui');
+        const storage = this.services.get('storage');
+        
+        try {
+            const confirmed = confirm('Are you sure you want to clear all saved products? This action cannot be undone.');
+            
+            if (!confirmed) return;
+            
+            const success = await storage.clearProducts();
+            
+            if (!success) {
+                ui.showError('Failed to clear list');
+            }
+            
+        } catch (error) {
+            this.errorHandler.handle(error, 'Failed to clear list');
+            ui.showError(`Error clearing list: ${error.message}`);
+        }
+    }
+    
+    /**
+     * Handle exporting product list
+     */
+    async handleExportList() {
+        const ui = this.services.get('ui');
+        const storage = this.services.get('storage');
+        
+        try {
+            const jsonData = await storage.exportProducts('json');
+            
+            // Create and download file
+            const blob = new Blob([jsonData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            
+            a.href = url;
+            a.download = `shopping-list-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            ui.showSuccessMessage(ExtensionConfig.messages.success.listExported);
+            
+        } catch (error) {
+            this.errorHandler.handle(error, 'Failed to export list');
+            ui.showError(`Error exporting list: ${error.message}`);
+        }
+    }
+    
+    /**
+     * Handle visiting a product URL
+     */
+    async handleVisitProduct(url) {
+        try {
+            await chrome.tabs.create({ url, active: true });
+        } catch (error) {
+            this.errorHandler.handle(error, 'Failed to open URL');
+            const ui = this.services.get('ui');
+            ui.showError(`Failed to open URL: ${error.message}`);
+        }
+    }
+    
+    /**
+     * Handle removing a product
+     */
+    async handleRemoveProduct(productId) {
+        const ui = this.services.get('ui');
+        const storage = this.services.get('storage');
+        
+        try {
+            const success = await storage.removeProduct(productId);
+            
+            if (!success) {
+                ui.showError('Failed to remove product from list');
+            }
+            
+        } catch (error) {
+            this.errorHandler.handle(error, 'Failed to remove product');
+            ui.showError(`Error removing from list: ${error.message}`);
+        }
+    }
+    
+    /**
+     * Handle products updated event
+     */
+    async handleProductsUpdated(products) {
+        const ui = this.services.get('ui');
+        await ui.updateProductList(products);
+    }
+    
+
+    
+    /**
+     * Fetch page info from URL
+     */
+    async fetchPageInfo(url) {
+        return new Promise((resolve, reject) => {
+            chrome.tabs.create({ url, active: false }, (tab) => {
+                const timeoutId = setTimeout(() => {
+                    chrome.tabs.remove(tab.id);
+                    resolve({ success: false, error: 'Timeout: Page took too long to load' });
+                }, ExtensionConfig.timing.pageTimeout);
+                
+                const onTabUpdated = (updatedTabId, changeInfo, updatedTab) => {
+                    if (updatedTabId === tab.id && changeInfo.status === 'complete') {
+                        chrome.tabs.onUpdated.removeListener(onTabUpdated);
+                        clearTimeout(timeoutId);
+                        
+                        chrome.tabs.sendMessage(tab.id, { action: 'getPageInfo' }, (response) => {
+                            chrome.tabs.remove(tab.id);
+                            
+                            if (response) {
+                                resolve({
+                                    success: true,
+                                    title: response.title || updatedTab.title || 'No title found',
+                                    price: response.price || 'No price found',
+                                    url: url
+                                });
+                            } else {
+                                resolve({
+                                    success: true,
+                                    title: updatedTab.title || 'No title found',
+                                    price: 'No price found',
+                                    url: url
+                                });
+                            }
+                        });
+                    }
+                };
+                
+                chrome.tabs.onUpdated.addListener(onTabUpdated);
+            });
+        });
+    }
+    
+    /**
+     * Get current tab info
+     */
+    async getCurrentTabInfo() {
+        return new Promise((resolve) => {
+            chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
+                if (!tabs[0]) {
+                    resolve({ success: false, error: 'Unable to get current tab information' });
+                    return;
+                }
+                
+                const tab = tabs[0];
+                
+                try {
+                    const response = await chrome.tabs.sendMessage(tab.id, { action: 'getPageInfo' });
+                    
+                    resolve({
+                        success: true,
+                        title: response?.title || tab.title || 'No title found',
+                        price: response?.price || 'No price found',
+                        url: tab.url
+                    });
+                } catch (error) {
+                    resolve({
+                        success: true,
+                        title: tab.title || 'No title found',
+                        price: 'No price found - Extension error',
+                        url: tab.url
+                    });
+                }
+            });
+        });
+    }
+    
+    /**
+     * Handle UI action
+     */
+    async handleUIAction(action) {
+        console.log('UI Action:', action);
+        // Handle specific UI actions if needed
+    }
+    
+    /**
+     * Emit events through the event bus
+     */
+    emit(event, data) {
+        const eventBus = this.services.get('eventBus');
+        if (eventBus) {
+            eventBus.emit(event, data);
+        }
+    }
+    
+    /**
+     * Get service instance
+     */
+    getService(name) {
+        return this.services.get(name);
+    }
+    
+    /**
+     * Get application statistics
+     */
+    async getStats() {
+        const storage = this.services.get('storage');
+        const performance = this.services.get('performance');
+        const eventBus = this.services.get('eventBus');
+        
+        return {
+            storage: await storage.getStorageStats(),
+            performance: {
+                cacheStats: performance.cacheAPI.stats(),
+                memoryThreshold: performance.memoryThreshold
+            },
+            eventBus: eventBus.getStats(),
+            isInitialized: this.isInitialized
+        };
     }
     
     /**

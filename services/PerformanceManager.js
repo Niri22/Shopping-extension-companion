@@ -21,7 +21,7 @@ class PerformanceManager {
     /**
      * Cache management with TTL and size limits
      */
-    cache = {
+    cacheAPI = {
         set: (key, value, ttl = 300000) => { // 5 minutes default TTL
             const now = Date.now();
             this.cache.set(key, {
@@ -109,10 +109,10 @@ class PerformanceManager {
      */
     throttle(key, func, limit = 1000) {
         const now = Date.now();
-        const lastCall = this.cache.get(`throttle_${key}`);
+        const lastCall = this.cacheAPI.get(`throttle_${key}`);
         
-        if (!lastCall || now - lastCall.value >= limit) {
-            this.cache.set(`throttle_${key}`, now, limit);
+        if (!lastCall || now - lastCall >= limit) {
+            this.cacheAPI.set(`throttle_${key}`, now, limit);
             return func();
         }
         
@@ -267,8 +267,8 @@ class PerformanceManager {
     preloadResource(url, type = 'fetch') {
         const cacheKey = `preload_${url}`;
         
-        if (this.cache.has(cacheKey)) {
-            return this.cache.get(cacheKey);
+        if (this.cacheAPI.has(cacheKey)) {
+            return this.cacheAPI.get(cacheKey);
         }
         
         let promise;
@@ -289,7 +289,7 @@ class PerformanceManager {
                 break;
         }
         
-        this.cache.set(cacheKey, promise, 600000); // 10 minutes
+        this.cacheAPI.set(cacheKey, promise, 600000); // 10 minutes
         return promise;
     }
     

@@ -46,7 +46,7 @@ class StorageService {
         const cacheKey = this.config.keys.productList;
         
         // Check performance manager cache first
-        const cached = this.performanceManager.cache.get(cacheKey);
+        const cached = this.performanceManager.cacheAPI.get(cacheKey);
         if (cached) {
             return cached;
         }
@@ -62,7 +62,7 @@ class StorageService {
                 const products = result[cacheKey] || [];
                 
                 // Cache the result
-                this.performanceManager.cache.set(cacheKey, products, 300000); // 5 minutes
+                this.performanceManager.cacheAPI.set(cacheKey, products, 300000); // 5 minutes
                 
                 // Emit event for other components
                 this.eventBus.emit('storage:products:loaded', products);
@@ -102,7 +102,7 @@ class StorageService {
                 
                 // Update cache
                 const cacheKey = this.config.keys.productList;
-                this.performanceManager.cache.set(cacheKey, updatedProducts, 300000);
+                this.performanceManager.cacheAPI.set(cacheKey, updatedProducts, 300000);
                 
                 // Emit events
                 this.eventBus.emit('storage:product:saved', processedProduct);
@@ -139,7 +139,7 @@ class StorageService {
                 
                 // Update cache
                 const cacheKey = this.config.keys.productList;
-                this.performanceManager.cache.set(cacheKey, filteredProducts, 300000);
+                this.performanceManager.cacheAPI.set(cacheKey, filteredProducts, 300000);
                 
                 // Emit events
                 this.eventBus.emit('storage:product:removed', productId);
@@ -195,7 +195,7 @@ class StorageService {
                 
                 // Update cache
                 const cacheKey = this.config.keys.productList;
-                this.performanceManager.cache.set(cacheKey, updatedProducts, 300000);
+                this.performanceManager.cacheAPI.set(cacheKey, updatedProducts, 300000);
                 
                 // Emit events
                 this.eventBus.emit('storage:products:batch-saved', validProducts);
@@ -222,7 +222,7 @@ class StorageService {
                 
                 // Clear cache
                 const cacheKey = this.config.keys.productList;
-                this.performanceManager.cache.delete(cacheKey);
+                this.performanceManager.cacheAPI.delete(cacheKey);
                 
                 // Emit events
                 this.eventBus.emit('storage:products:cleared');
@@ -267,7 +267,7 @@ class StorageService {
         const cacheKey = `search_${query}_${JSON.stringify(options)}`;
         
         // Check cache first
-        const cached = this.performanceManager.cache.get(cacheKey);
+        const cached = this.performanceManager.cacheAPI.get(cacheKey);
         if (cached) {
             return cached;
         }
@@ -277,7 +277,7 @@ class StorageService {
             const results = this.filterProducts(products, query, options);
             
             // Cache search results for 1 minute
-            this.performanceManager.cache.set(cacheKey, results, 60000);
+            this.performanceManager.cacheAPI.set(cacheKey, results, 60000);
             
             return results;
         });
@@ -297,7 +297,7 @@ class StorageService {
                 totalSizeKB: (totalSize / 1024).toFixed(2),
                 maxItems: this.config.maxItems,
                 usagePercentage: ((products.length / this.config.maxItems) * 100).toFixed(1),
-                cacheStats: this.performanceManager.cache.stats()
+                cacheStats: this.performanceManager.cacheAPI.stats()
             };
         } catch (error) {
             console.error('Failed to get storage stats:', error);
@@ -413,7 +413,7 @@ class StorageService {
         
         if (changes[productListKey]) {
             // Clear cache when storage changes externally
-            this.performanceManager.cache.delete(productListKey);
+            this.performanceManager.cacheAPI.delete(productListKey);
             
             // Emit event for other components
             this.eventBus.emit('storage:external-change', changes[productListKey]);

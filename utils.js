@@ -1,185 +1,194 @@
 /**
- * Utility Functions for Chrome Extension
- * Common helper functions used across different parts of the extension
+ * Extension Utilities - Simple and Reliable Legacy System
+ * Focus on proven functionality without complex caching or service architecture
  */
 
 const ExtensionUtils = {
-    
     /**
-     * URL validation and manipulation
+     * URL utilities for validation and normalization
      */
     url: {
         /**
-         * Validates if a string is a valid HTTP/HTTPS URL
-         * @param {string} url - The URL to validate
+         * Validates a URL string
+         * @param {string} url - URL to validate
          * @returns {object} - Validation result with valid flag and error message
          */
         validate(url) {
-            if (!url || typeof url !== 'string') {
-                return { 
-                    valid: false, 
-                    error: ExtensionConfig.messages.errors.emptyUrl 
+            if (!url || url.trim() === '') {
+                return {
+                    valid: false,
+                    error: ExtensionConfig.messages.errors.emptyUrl
                 };
             }
             
             try {
-                const urlObj = new URL(url.trim());
-                if (!['http:', 'https:'].includes(urlObj.protocol)) {
-                    return { 
-                        valid: false, 
-                        error: ExtensionConfig.messages.errors.invalidUrl 
-                    };
-                }
+                new URL(url);
                 return { valid: true };
             } catch (error) {
-                return { 
-                    valid: false, 
-                    error: ExtensionConfig.messages.errors.invalidUrl 
+                return {
+                    valid: false,
+                    error: ExtensionConfig.messages.errors.invalidUrl
                 };
             }
         },
         
         /**
-         * Normalizes a URL by trimming whitespace and ensuring proper format
-         * @param {string} url - The URL to normalize
+         * Normalizes a URL by adding protocol if missing
+         * @param {string} url - URL to normalize
          * @returns {string} - Normalized URL
          */
         normalize(url) {
             if (!url) return '';
-            return url.trim();
+            
+            url = url.trim();
+            if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                url = 'https://' + url;
+            }
+            
+            return url;
         }
     },
     
     /**
-     * Price validation and formatting utilities
+     * Price utilities for validation and parsing
      */
     price: {
         /**
-         * Checks if a price string represents a valid, loaded price
-         * @param {string} price - The price string to validate
-         * @returns {boolean} - True if price is valid and loaded
+         * Checks if a price string appears to be valid
+         * @param {string} price - Price string to validate
+         * @returns {boolean} - True if price appears valid
          */
         isValid(price) {
-            return price && 
-                   price !== ExtensionConfig.messages.notFound.price &&
-                   price !== ExtensionConfig.messages.loading.pageLoading &&
-                   price !== ExtensionConfig.messages.loading.dynamicContent;
+            if (!price || typeof price !== 'string') return false;
+            
+            const pricePattern = /[\$€£¥₹₽]\s*\d+(?:[.,]\d{2})?|\d+(?:[.,]\d{2})?\s*[\$€£¥₹₽]/;
+            return pricePattern.test(price.trim()) && 
+                   !price.includes('Loading') && 
+                   !price.includes('loading') &&
+                   !price.includes('...') &&
+                   price !== ExtensionConfig.messages.notFound.price;
         },
         
         /**
-         * Validates that a price is realistic (within reasonable bounds)
-         * @param {string} priceString - The price string to validate
-         * @returns {boolean} - True if price is realistic
+         * Checks if price seems realistic (not too high/low)
+         * @param {string} priceString - Price to check
+         * @returns {boolean} - True if realistic
          */
         isRealistic(priceString) {
-            const numericValue = parseFloat(priceString.replace(/[^\d.]/g, ''));
-            const config = ExtensionConfig.priceExtraction.validation;
-            return numericValue >= config.minPrice && numericValue <= config.maxPrice;
+            const numericValue = this.getNumericValue(priceString);
+            return numericValue > 0 && numericValue < 100000; // Between $0 and $100,000
         },
         
         /**
          * Extracts numeric value from price string
-         * @param {string} priceString - The price string
-         * @returns {number} - Numeric value of the price
+         * @param {string} priceString - Price string
+         * @returns {number} - Numeric value
          */
         getNumericValue(priceString) {
             if (!priceString) return 0;
-            return parseFloat(priceString.replace(/[^\d.]/g, '')) || 0;
+            const match = priceString.match(/\d+(?:[.,]\d{2})?/);
+            return match ? parseFloat(match[0].replace(',', '.')) : 0;
         }
     },
     
     /**
-     * DOM manipulation utilities
+     * DOM utilities for element interaction
      */
     dom: {
         /**
          * Safely gets text content from an element
-         * @param {string} selector - CSS selector for the element
-         * @param {Document} doc - Document to search in (defaults to document)
-         * @returns {string} - Text content or empty string
+         * @param {string} selector - CSS selector
+         * @param {Document} doc - Document to search in
+         * @returns {string|null} - Text content or null
          */
         getElementText(selector, doc = document) {
             try {
                 const element = doc.querySelector(selector);
-                return element?.textContent?.trim() || '';
+                return element ? element.textContent.trim() : null;
             } catch (error) {
-                return '';
+                return null;
             }
         },
         
         /**
-         * Safely gets attribute content from an element
-         * @param {string} selector - CSS selector for the element
-         * @param {string} attribute - Attribute name to get
-         * @param {Document} doc - Document to search in (defaults to document)
-         * @returns {string} - Attribute content or empty string
+         * Safely gets attribute value from an element
+         * @param {string} selector - CSS selector
+         * @param {string} attribute - Attribute name
+         * @param {Document} doc - Document to search in
+         * @returns {string|null} - Attribute value or null
          */
         getElementAttribute(selector, attribute, doc = document) {
             try {
                 const element = doc.querySelector(selector);
-                return element?.getAttribute(attribute)?.trim() || '';
+                return element ? element.getAttribute(attribute) : null;
             } catch (error) {
-                return '';
+                return null;
             }
         },
         
         /**
          * Checks if an element is visible
-         * @param {Element} element - The element to check
-         * @returns {boolean} - True if element is visible
+         * @param {Element} element - Element to check
+         * @returns {boolean} - True if visible
          */
         isVisible(element) {
             if (!element) return false;
-            return element.offsetParent !== null && 
-                   element.offsetWidth > 0 && 
-                   element.offsetHeight > 0;
+            const style = window.getComputedStyle(element);
+            return style.display !== 'none' && 
+                   style.visibility !== 'hidden' && 
+                   style.opacity !== '0';
         }
     },
     
     /**
-     * Text processing utilities
+     * Text utilities for cleaning and parsing
      */
     text: {
         /**
-         * Normalizes text by trimming and collapsing whitespace
+         * Normalizes text by removing extra whitespace
          * @param {string} text - Text to normalize
          * @returns {string} - Normalized text
          */
         normalize(text) {
-            if (!text || typeof text !== 'string') return '';
-            return text.trim().replace(/\s+/g, ' ');
+            if (!text) return '';
+            return text.replace(/\s+/g, ' ').trim();
         },
         
         /**
-         * Checks if text contains any of the specified patterns
+         * Checks if text contains any of the given patterns
          * @param {string} text - Text to check
-         * @param {string[]} patterns - Array of patterns to look for
-         * @returns {boolean} - True if any pattern is found
+         * @param {Array<string>} patterns - Patterns to look for
+         * @returns {boolean} - True if any pattern found
          */
         containsAny(text, patterns) {
-            if (!text || !Array.isArray(patterns)) return false;
+            if (!text || !patterns) return false;
             const lowerText = text.toLowerCase();
             return patterns.some(pattern => lowerText.includes(pattern.toLowerCase()));
         },
         
         /**
-         * Extracts price using regex patterns
-         * @param {string} text - Text to extract price from
+         * Extracts price from text using regex
+         * @param {string} text - Text to search
          * @returns {string|null} - Extracted price or null
          */
         extractPrice(text) {
-            if (!text || typeof text !== 'string') return null;
+            if (!text) return null;
             
-            const normalizedText = this.normalize(text);
-            const patterns = ExtensionConfig.priceExtraction.patterns;
+            const pricePatterns = [
+                /\$\s*\d+(?:[.,]\d{2})?/g,
+                /€\s*\d+(?:[.,]\d{2})?/g,
+                /£\s*\d+(?:[.,]\d{2})?/g,
+                /¥\s*\d+(?:[.,]\d{2})?/g,
+                /₹\s*\d+(?:[.,]\d{2})?/g,
+                /\d+(?:[.,]\d{2})?\s*\$/g,
+                /\d+(?:[.,]\d{2})?\s*€/g,
+                /\d+(?:[.,]\d{2})?\s*£/g
+            ];
             
-            for (const pattern of patterns) {
-                const matches = normalizedText.match(pattern);
+            for (const pattern of pricePatterns) {
+                const matches = text.match(pattern);
                 if (matches && matches.length > 0) {
-                    const price = matches[0].trim();
-                    if (/\d/.test(price)) {
-                        return price;
-                    }
+                    return matches[0].trim();
                 }
             }
             
@@ -188,24 +197,24 @@ const ExtensionUtils = {
     },
     
     /**
-     * Async utilities
+     * Async utilities for delays and retries
      */
     async: {
         /**
-         * Creates a delay promise
+         * Creates a delay
          * @param {number} ms - Milliseconds to delay
-         * @returns {Promise} - Promise that resolves after the delay
+         * @returns {Promise} - Promise that resolves after delay
          */
         delay(ms) {
             return new Promise(resolve => setTimeout(resolve, ms));
         },
         
         /**
-         * Implements retry logic with progressive delays
+         * Retries a function with exponential backoff
          * @param {Function} fn - Function to retry
-         * @param {number} maxAttempts - Maximum number of attempts
-         * @param {number[]} delays - Array of delay times between attempts
-         * @returns {Promise} - Promise that resolves with the result
+         * @param {number} maxAttempts - Maximum attempts
+         * @param {Array<number>} delays - Delay array in ms
+         * @returns {Promise} - Promise that resolves with result
          */
         async retry(fn, maxAttempts = 3, delays = [1000, 2000, 3000]) {
             let lastError;
@@ -215,10 +224,8 @@ const ExtensionUtils = {
                     return await fn();
                 } catch (error) {
                     lastError = error;
-                    
                     if (attempt < maxAttempts - 1) {
-                        const delay = delays[attempt] || delays[delays.length - 1];
-                        await this.delay(delay);
+                        await this.delay(delays[attempt] || delays[delays.length - 1]);
                     }
                 }
             }
@@ -228,32 +235,44 @@ const ExtensionUtils = {
     },
     
     /**
-     * Storage utilities for managing saved products
+     * Simple and Reliable Storage utilities for managing saved products
      */
     storage: {
         /**
-         * Saves a product to the stored list
+         * Saves a product to the stored list with proper duplicate handling
          * @param {object} product - Product object with title, price, url, domain
          * @returns {Promise<boolean>} - Success status
          */
         async saveProduct(product) {
             try {
-                const existingProducts = await this.getProducts();
-                const productId = this.generateProductId(product);
+                console.log('💾 [Storage] Saving product:', product);
                 
-                // Check if product already exists
+                // This will throw if there's an error, which we want to catch
+                const existingProducts = await this._getProductsOrThrow();
+                console.log('📋 [Storage] Current products count:', existingProducts.length);
+                
+                const productId = this.generateProductId(product);
+                console.log('🔑 [Storage] Generated ID:', productId);
+                
+                // Check if product already exists by ID
                 const existingIndex = existingProducts.findIndex(p => p.id === productId);
+                console.log('🔍 [Storage] Existing index:', existingIndex);
+                
+                let updatedProducts;
                 
                 if (existingIndex !== -1) {
                     // Update existing product
-                    existingProducts[existingIndex] = {
+                    console.log('🔄 [Storage] Updating existing product');
+                    updatedProducts = [...existingProducts];
+                    updatedProducts[existingIndex] = {
                         ...product,
                         id: productId,
-                        dateAdded: existingProducts[existingIndex].dateAdded,
+                        dateAdded: existingProducts[existingIndex].dateAdded, // Preserve original date
                         dateUpdated: new Date().toISOString()
                     };
                 } else {
-                    // Add new product
+                    // Add new product at the beginning
+                    console.log('➕ [Storage] Adding new product');
                     const newProduct = {
                         ...product,
                         id: productId,
@@ -261,20 +280,25 @@ const ExtensionUtils = {
                         dateUpdated: new Date().toISOString()
                     };
                     
-                    existingProducts.unshift(newProduct); // Add to beginning
+                    updatedProducts = [newProduct, ...existingProducts];
                     
                     // Limit the number of stored products
-                    if (existingProducts.length > ExtensionConfig.storage.maxItems) {
-                        existingProducts.splice(ExtensionConfig.storage.maxItems);
+                    if (updatedProducts.length > ExtensionConfig.storage.maxItems) {
+                        updatedProducts = updatedProducts.slice(0, ExtensionConfig.storage.maxItems);
+                        console.log('✂️ [Storage] Trimmed to max items:', ExtensionConfig.storage.maxItems);
                     }
                 }
                 
+                // Save to Chrome storage
                 await chrome.storage.local.set({
-                    [ExtensionConfig.storage.keys.productList]: existingProducts
+                    [ExtensionConfig.storage.keys.productList]: updatedProducts
                 });
                 
+                console.log('✅ [Storage] Successfully saved. New count:', updatedProducts.length);
                 return true;
+                
             } catch (error) {
+                console.error('❌ [Storage] Failed to save product:', error);
                 ExtensionUtils.log.error('Failed to save product', error);
                 return false;
             }
@@ -287,11 +311,25 @@ const ExtensionUtils = {
         async getProducts() {
             try {
                 const result = await chrome.storage.local.get([ExtensionConfig.storage.keys.productList]);
-                return result[ExtensionConfig.storage.keys.productList] || [];
+                const products = result[ExtensionConfig.storage.keys.productList] || [];
+                console.log('📋 [Storage] Retrieved products count:', products.length);
+                return products;
             } catch (error) {
+                console.error('❌ [Storage] Failed to get products:', error);
                 ExtensionUtils.log.error('Failed to get products', error);
                 return [];
             }
+        },
+        
+        /**
+         * Internal method to get products that throws errors (for saveProduct)
+         * @returns {Promise<Array>} - Array of saved products
+         */
+        async _getProductsOrThrow() {
+            const result = await chrome.storage.local.get([ExtensionConfig.storage.keys.productList]);
+            const products = result[ExtensionConfig.storage.keys.productList] || [];
+            console.log('📋 [Storage] Retrieved products count:', products.length);
+            return products;
         },
         
         /**
@@ -301,6 +339,8 @@ const ExtensionUtils = {
          */
         async removeProduct(productId) {
             try {
+                console.log('🗑️ [Storage] Removing product ID:', productId);
+                
                 const existingProducts = await this.getProducts();
                 const filteredProducts = existingProducts.filter(p => p.id !== productId);
                 
@@ -308,8 +348,10 @@ const ExtensionUtils = {
                     [ExtensionConfig.storage.keys.productList]: filteredProducts
                 });
                 
+                console.log('✅ [Storage] Product removed. New count:', filteredProducts.length);
                 return true;
             } catch (error) {
+                console.error('❌ [Storage] Failed to remove product:', error);
                 ExtensionUtils.log.error('Failed to remove product', error);
                 return false;
             }
@@ -321,11 +363,16 @@ const ExtensionUtils = {
          */
         async clearProducts() {
             try {
+                console.log('🧹 [Storage] Clearing all products');
+                
                 await chrome.storage.local.set({
                     [ExtensionConfig.storage.keys.productList]: []
                 });
+                
+                console.log('✅ [Storage] All products cleared');
                 return true;
             } catch (error) {
+                console.error('❌ [Storage] Failed to clear products:', error);
                 ExtensionUtils.log.error('Failed to clear products', error);
                 return false;
             }
@@ -337,23 +384,49 @@ const ExtensionUtils = {
          */
         async exportProducts() {
             try {
+                console.log('📤 [Storage] Exporting products');
                 const products = await this.getProducts();
                 return JSON.stringify(products, null, 2);
             } catch (error) {
+                console.error('❌ [Storage] Failed to export products:', error);
                 ExtensionUtils.log.error('Failed to export products', error);
                 return '[]';
             }
         },
         
         /**
-         * Generates a unique ID for a product based on URL
+         * Generates a unique ID for a product based on URL and title
          * @param {object} product - Product object
          * @returns {string} - Unique product ID
          */
         generateProductId(product) {
-            // Use URL as the primary identifier, fallback to title + domain
-            const identifier = product.url || `${product.title}-${product.domain}`;
-            return btoa(identifier).replace(/[^a-zA-Z0-9]/g, '').substring(0, 16);
+            // Create a unique identifier using URL (primary) + title (secondary)
+            let identifier;
+            
+            if (product.url && product.url.trim()) {
+                // Use full URL as primary identifier
+                identifier = product.url.trim();
+            } else {
+                // Fallback to title + domain combination
+                identifier = `${product.title || 'untitled'}-${product.domain || 'unknown'}`;
+            }
+            
+            // Create a more robust hash using URL + title for uniqueness
+            const combined = `${identifier}|${product.title || ''}`;
+            
+            // Use a simple hash function for better uniqueness
+            let hash = 0;
+            for (let i = 0; i < combined.length; i++) {
+                const char = combined.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash; // Convert to 32-bit integer
+            }
+            
+            // Convert to positive number and then to base36 for shorter ID
+            const cleanId = Math.abs(hash).toString(36).substring(0, 16);
+            
+            console.log('🔑 [Storage] Generated ID for:', identifier, '→', cleanId);
+            return cleanId;
         },
         
         /**
@@ -362,29 +435,47 @@ const ExtensionUtils = {
          * @returns {boolean} - True if valid
          */
         isValidProduct(product) {
-            return product && 
-                   product.title && 
-                   product.title.trim() !== '' &&
-                   product.title !== ExtensionConfig.messages.notFound.title;
+            const isValid = product && 
+                           product.title && 
+                           product.title.trim() !== '' &&
+                           product.title !== ExtensionConfig.messages.notFound.title &&
+                           product.title !== 'No title found';
+            
+            console.log('✅ [Storage] Product validation:', isValid, 'for:', product?.title);
+            return isValid;
         }
     },
 
     /**
-     * Chrome extension specific utilities
+     * Chrome extension specific utilities with improved error handling
      */
     chrome: {
         /**
-         * Safely sends a message to a tab
+         * Safely sends a message to a tab with timeout and retry
          * @param {number} tabId - ID of the tab
          * @param {object} message - Message to send
+         * @param {number} timeoutMs - Timeout in milliseconds
          * @returns {Promise} - Promise that resolves with the response
          */
-        sendMessageToTab(tabId, message) {
+        sendMessageToTab(tabId, message, timeoutMs = 5000) {
             return new Promise((resolve, reject) => {
+                console.log('📤 [Chrome] Sending message to tab:', tabId, message);
+                
+                // Set up timeout
+                const timeoutId = setTimeout(() => {
+                    console.log('⏰ [Chrome] Message timeout for tab:', tabId);
+                    resolve(null); // Return null instead of rejecting for timeout
+                }, timeoutMs);
+                
                 chrome.tabs.sendMessage(tabId, message, (response) => {
+                    clearTimeout(timeoutId);
+                    
                     if (chrome.runtime.lastError) {
-                        reject(new Error(chrome.runtime.lastError.message));
+                        console.log('⚠️ [Chrome] Message error:', chrome.runtime.lastError.message);
+                        // Don't reject for content script errors, return null
+                        resolve(null);
                     } else {
+                        console.log('✅ [Chrome] Message response:', response);
                         resolve(response);
                     }
                 });
@@ -396,8 +487,15 @@ const ExtensionUtils = {
          * @returns {Promise<object>} - Promise that resolves with the active tab
          */
         async getCurrentTab() {
-            const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
-            return tabs[0];
+            try {
+                const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+                const tab = tabs[0];
+                console.log('📋 [Chrome] Current tab:', tab?.url);
+                return tab;
+            } catch (error) {
+                console.error('❌ [Chrome] Failed to get current tab:', error);
+                return null;
+            }
         },
         
         /**
@@ -408,14 +506,32 @@ const ExtensionUtils = {
          */
         createTab(url, active = false) {
             return new Promise((resolve, reject) => {
+                console.log('🆕 [Chrome] Creating tab:', url);
+                
                 chrome.tabs.create({ url, active }, (tab) => {
                     if (chrome.runtime.lastError) {
+                        console.error('❌ [Chrome] Failed to create tab:', chrome.runtime.lastError.message);
                         reject(new Error(chrome.runtime.lastError.message));
                     } else {
+                        console.log('✅ [Chrome] Tab created:', tab.id);
                         resolve(tab);
                     }
                 });
             });
+        },
+        
+        /**
+         * Checks if content script is available in a tab
+         * @param {number} tabId - ID of the tab
+         * @returns {Promise<boolean>} - True if content script responds
+         */
+        async isContentScriptAvailable(tabId) {
+            try {
+                const response = await this.sendMessageToTab(tabId, { action: 'ping' }, 2000);
+                return response !== null;
+            } catch (error) {
+                return false;
+            }
         }
     },
     
@@ -430,15 +546,9 @@ const ExtensionUtils = {
          * @param {...any} args - Additional arguments
          */
         write(level, message, ...args) {
-            if (!ExtensionConfig.debug.enabled) return;
-            
-            const logLevel = ExtensionConfig.debug.logLevel;
-            const levels = ['debug', 'info', 'warn', 'error'];
-            const currentLevelIndex = levels.indexOf(logLevel);
-            const messageLevelIndex = levels.indexOf(level);
-            
-            if (messageLevelIndex >= currentLevelIndex) {
-                console[level](`[${ExtensionConfig.name}] ${message}`, ...args);
+            if (ExtensionConfig.debug.enabled) {
+                const timestamp = new Date().toISOString();
+                console[level](`[${timestamp}] ${message}`, ...args);
             }
         },
         
@@ -449,12 +559,7 @@ const ExtensionUtils = {
     }
 };
 
-// Export for use in other files
+// Export for Node.js (testing)
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = ExtensionUtils;
-}
-
-// Make available globally for browser environment
-if (typeof window !== 'undefined') {
-    window.ExtensionUtils = ExtensionUtils;
 } 

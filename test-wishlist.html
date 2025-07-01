@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wishlist Persistence Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .test-step {
+            margin: 15px 0;
+            padding: 15px;
+            border-left: 4px solid #007cba;
+            background: #f8f9fa;
+        }
+        .success {
+            border-left-color: #28a745;
+            background: #d4edda;
+        }
+        .info {
+            border-left-color: #17a2b8;
+            background: #d1ecf1;
+        }
+        .warning {
+            border-left-color: #ffc107;
+            background: #fff3cd;
+        }
+        code {
+            background: #f1f1f1;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+        .button {
+            background: #007cba;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .button:hover {
+            background: #005a8b;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 Wishlist Persistence Test</h1>
+        <p>This page helps you test that the wishlist feature correctly persists products across all pages.</p>
+    </div>
+
+    <div class="test-container">
+        <h2>📋 Test Instructions</h2>
+        
+        <div class="test-step">
+            <h3>Step 1: Add a Product to Wishlist</h3>
+            <p>1. Open the extension popup on any e-commerce site (Amazon, eBay, etc.)</p>
+            <p>2. Click <strong>"Get Current Tab Info"</strong> to fetch product information</p>
+            <p>3. Click <strong>"Add to List"</strong> to save the product</p>
+            <p>4. Verify you see the success message and the product appears in the list</p>
+        </div>
+
+        <div class="test-step info">
+            <h3>Step 2: Navigate to Different Page</h3>
+            <p>1. Navigate to a completely different website (e.g., from Amazon to Google)</p>
+            <p>2. Open the extension popup again</p>
+            <p>3. Click the <strong>"Show List"</strong> button to expand the saved products</p>
+            <p>4. <strong>✅ EXPECTED:</strong> Your previously saved product should still be visible</p>
+        </div>
+
+        <div class="test-step">
+            <h3>Step 3: Add Another Product</h3>
+            <p>1. On the new page, fetch another product's information</p>
+            <p>2. Add it to the list</p>
+            <p>3. <strong>✅ EXPECTED:</strong> Both products should now be visible in the list</p>
+        </div>
+
+        <div class="test-step success">
+            <h3>Step 4: Test Persistence After Browser Restart</h3>
+            <p>1. Close the browser completely</p>
+            <p>2. Reopen the browser and navigate to any website</p>
+            <p>3. Open the extension popup and check the saved list</p>
+            <p>4. <strong>✅ EXPECTED:</strong> All saved products should still be there</p>
+        </div>
+    </div>
+
+    <div class="test-container">
+        <h2>🔧 Technical Details</h2>
+        
+        <div class="test-step">
+            <h3>How Persistence Works</h3>
+            <p>The wishlist uses <code>chrome.storage.local</code> API which provides:</p>
+            <ul>
+                <li><strong>Cross-page persistence</strong>: Data is available on all pages</li>
+                <li><strong>Browser restart persistence</strong>: Data survives browser restarts</li>
+                <li><strong>Automatic sync</strong>: Changes are immediately available across all extension instances</li>
+            </ul>
+        </div>
+
+        <div class="test-step info">
+            <h3>Storage Configuration</h3>
+            <p>Current settings:</p>
+            <ul>
+                <li>Storage key: <code>saved_products</code></li>
+                <li>Maximum items: <code>100 products</code></li>
+                <li>Caching: <code>5 minutes TTL</code></li>
+                <li>Auto-cleanup: <code>Enabled</code></li>
+            </ul>
+        </div>
+
+        <div class="test-step warning">
+            <h3>Troubleshooting</h3>
+            <p>If products are not persisting:</p>
+            <ol>
+                <li>Check browser console for errors (F12 → Console)</li>
+                <li>Verify extension has storage permissions</li>
+                <li>Try disabling/re-enabling the extension</li>
+                <li>Clear extension data: Chrome → Settings → Privacy → Site Settings → View permissions and data stored across sites → Find extension → Clear data</li>
+            </ol>
+        </div>
+    </div>
+
+    <div class="test-container">
+        <h2>🎯 Expected Behavior</h2>
+        
+        <div class="test-step success">
+            <h3>✅ What Should Work</h3>
+            <ul>
+                <li>Products saved on any page appear on all other pages</li>
+                <li>List persists after browser restart</li>
+                <li>Product count badge updates correctly</li>
+                <li>Remove/clear operations work across all pages</li>
+                <li>Export functionality includes all saved products</li>
+            </ul>
+        </div>
+
+        <div class="test-step">
+            <h3>🔄 Service Architecture</h3>
+            <p>The new optimized architecture ensures persistence through:</p>
+            <ul>
+                <li><strong>StorageService</strong>: Manages all storage operations with caching</li>
+                <li><strong>EventBus</strong>: Synchronizes updates across components</li>
+                <li><strong>PerformanceManager</strong>: Caches frequently accessed data</li>
+                <li><strong>AppController</strong>: Coordinates initialization and data loading</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="test-container">
+        <h2>📊 Debug Information</h2>
+        <button class="button" onclick="checkStorageData()">Check Storage Data</button>
+        <button class="button" onclick="clearStorageData()">Clear Storage Data</button>
+        <div id="debugOutput" style="margin-top: 15px; padding: 10px; background: #f8f9fa; border-radius: 4px; display: none;">
+            <h4>Storage Contents:</h4>
+            <pre id="storageContents"></pre>
+        </div>
+    </div>
+
+    <script>
+        async function checkStorageData() {
+            try {
+                const result = await chrome.storage.local.get(['saved_products']);
+                const products = result.saved_products || [];
+                
+                document.getElementById('debugOutput').style.display = 'block';
+                document.getElementById('storageContents').textContent = JSON.stringify(products, null, 2);
+                
+                console.log('Saved products:', products);
+            } catch (error) {
+                alert('Error accessing storage: ' + error.message);
+                console.error('Storage error:', error);
+            }
+        }
+
+        async function clearStorageData() {
+            if (confirm('Are you sure you want to clear all saved products? This action cannot be undone.')) {
+                try {
+                    await chrome.storage.local.set({ saved_products: [] });
+                    alert('Storage cleared successfully!');
+                    checkStorageData(); // Refresh display
+                } catch (error) {
+                    alert('Error clearing storage: ' + error.message);
+                    console.error('Clear storage error:', error);
+                }
+            }
+        }
+
+        // Auto-check storage on page load
+        if (typeof chrome !== 'undefined' && chrome.storage) {
+            checkStorageData();
+        } else {
+            document.getElementById('debugOutput').style.display = 'block';
+            document.getElementById('storageContents').textContent = 'Chrome storage API not available (not in extension context)';
+        }
+    </script>
+</body>
+</html> 
