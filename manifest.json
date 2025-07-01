@@ -1,11 +1,14 @@
 {
   "manifest_version": 3,
-  "name": "Page Title & Price Fetcher",
+  "name": "WishCart",
   "version": "1.1",
-  "description": "A Chrome extension that fetches and displays the title and price of any webpage",
+  "description": "A modern Chrome extension for smart shopping with wishlist management and automatic price tracking",
   "action": {
     "default_popup": "popup.html",
-    "default_title": "Page Title & Price Fetcher - Optimized"
+    "default_title": "WishCart - Smart Shopping Companion"
+  },
+  "background": {
+    "service_worker": "background.js"
   },
   "content_scripts": [
     {
@@ -16,7 +19,8 @@
   "permissions": [
     "activeTab",
     "tabs",
-    "storage"
+    "storage",
+    "alarms"
   ],
   "host_permissions": [
     "http://*/*",

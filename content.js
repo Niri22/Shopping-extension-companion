@@ -231,17 +231,29 @@ class SimplePageExtractor {
     }
     
     extractPriceFromText() {
-        // Look for price patterns in page text
-        const pricePattern = /[\$€£¥₹₽]\s*\d+(?:[.,]\d{2})?|\d+(?:[.,]\d{2})?\s*[\$€£¥₹₽]/g;
-        const pageText = document.body.textContent || '';
-        const matches = pageText.match(pricePattern);
+        // Enhanced price patterns including prefixed currencies
+        const pricePatterns = [
+            // Prefixed currencies like CA$129, US$99, AU$150
+            /(?:CA|US|AU|NZ|HK|SG)\$\s*\d+(?:[.,]\d{2})?/g,
+            // Standard currency symbols
+            /[\$€£¥₹₽]\s*\d+(?:[.,]\d{2})?/g,
+            // Numbers followed by currency symbols
+            /\d+(?:[.,]\d{2})?\s*[\$€£¥₹₽]/g,
+            // Numbers followed by currency codes
+            /\d+(?:[.,]\d{2})?\s*(?:USD|EUR|GBP|JPY|INR|CAD|AUD|CHF|CNY|SEK|NOK|DKK|PLN|CZK|HUF|RUB)/gi
+        ];
         
-        if (matches && matches.length > 0) {
-            // Return the first reasonable price found
-            for (const match of matches) {
-                const price = this.cleanPriceText(match);
-                if (price && this.isPriceRealistic(price)) {
-                    return price;
+        const pageText = document.body.textContent || '';
+        
+        for (const pattern of pricePatterns) {
+            const matches = pageText.match(pattern);
+            if (matches && matches.length > 0) {
+                // Return the first reasonable price found
+                for (const match of matches) {
+                    const price = this.cleanPriceText(match);
+                    if (price && this.isPriceRealistic(price)) {
+                        return price;
+                    }
                 }
             }
         }
@@ -292,17 +304,30 @@ class SimplePageExtractor {
     
     containsPrice(text) {
         if (!text) return false;
-        return /[\$€£¥₹₽]|\d+[.,]\d{2}/.test(text);
+        // Enhanced pattern to include CA$, US$, AU$, etc. and currency codes
+        return /(?:CA|US|AU|NZ|HK|SG)\$|[\$€£¥₹₽]|\d+[.,]\d{2}|(?:USD|EUR|GBP|JPY|INR|CAD|AUD|CHF|CNY|SEK|NOK|DKK|PLN|CZK|HUF|RUB)/.test(text);
     }
     
     cleanPriceText(text) {
         if (!text) return null;
         
-        // Extract price using regex
-        const priceMatch = text.match(/([\$€£¥₹₽]\s*\d+(?:[.,]\d{2})?|\d+(?:[.,]\d{2})?\s*[\$€£¥₹₽])/);
+        // Enhanced regex to handle CA$, US$, AU$ and other prefixed currencies
+        const pricePatterns = [
+            // Prefixed currencies like CA$129, US$99, AU$150
+            /((?:CA|US|AU|NZ|HK|SG)\$\s*\d+(?:[.,]\d{2})?)/,
+            // Standard currency symbols
+            /([\$€£¥₹₽]\s*\d+(?:[.,]\d{2})?)/,
+            // Numbers followed by currency symbols
+            /(\d+(?:[.,]\d{2})?\s*[\$€£¥₹₽])/,
+            // Numbers followed by currency codes
+            /(\d+(?:[.,]\d{2})?\s*(?:USD|EUR|GBP|JPY|INR|CAD|AUD|CHF|CNY|SEK|NOK|DKK|PLN|CZK|HUF|RUB))/i
+        ];
         
-        if (priceMatch) {
-            return priceMatch[1].trim();
+        for (const pattern of pricePatterns) {
+            const priceMatch = text.match(pattern);
+            if (priceMatch) {
+                return priceMatch[1].trim();
+            }
         }
         
         return null;

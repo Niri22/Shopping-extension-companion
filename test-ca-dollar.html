@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Azazie Tahlia Burnt Orange Bridesmaid Dress | Azazie CA</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        .product-container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .product-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        .price-display {
+            font-size: 32px;
+            font-weight: bold;
+            color: #d32f2f;
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #fff3e0;
+            border-radius: 8px;
+            border: 2px solid #ff9800;
+        }
+        .product-details {
+            margin-top: 20px;
+            line-height: 1.6;
+        }
+        .test-info {
+            background-color: #e3f2fd;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #2196f3;
+        }
+        .test-buttons {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .test-btn {
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            margin: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .test-btn:hover {
+            background-color: #45a049;
+        }
+        .results {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f5f5f5;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-info">
+        <h2>🧪 Canadian Dollar Price Extraction Test</h2>
+        <p>This page tests the enhanced price extraction for Canadian dollar format (CA$129) used on Azazie.ca</p>
+        <p><strong>Expected Price:</strong> CA$129</p>
+    </div>
+
+    <div class="product-container">
+        <h1 class="product-title">Azazie Tahlia Burnt Orange Bridesmaid Dress</h1>
+        
+        <div class="price-display" id="price-element">
+            CA$129
+        </div>
+        
+        <div class="product-details">
+            <p><strong>Color:</strong> Burnt Orange</p>
+            <p><strong>Style:</strong> A-Line with Belt Chiffon Dress</p>
+            <p><strong>Fabric:</strong> Chiffon</p>
+            <p><strong>Length:</strong> Floor Length</p>
+            <p><strong>Availability:</strong> Made to Order (3.5 weeks)</p>
+        </div>
+        
+        <div class="test-buttons">
+            <button class="test-btn" onclick="testPriceExtraction()">🔍 Test Price Extraction</button>
+            <button class="test-btn" onclick="testPriceChange()">💰 Test Price Change (CA$99)</button>
+            <button class="test-btn" onclick="resetPrice()">🔄 Reset Original Price</button>
+        </div>
+        
+        <div class="results" id="test-results" style="display: none;">
+            <h3>Test Results:</h3>
+            <div id="results-content"></div>
+        </div>
+    </div>
+
+    <script>
+        // Test different Canadian dollar formats
+        const testPrices = [
+            'CA$129',
+            'CA$99.99',
+            'CA$ 149',
+            'CA$1,299.99'
+        ];
+        
+        let currentTestIndex = 0;
+        
+        function testPriceExtraction() {
+            const priceElement = document.getElementById('price-element');
+            const resultsDiv = document.getElementById('test-results');
+            const resultsContent = document.getElementById('results-content');
+            
+            // Test current price
+            const currentPrice = priceElement.textContent.trim();
+            
+            // Simulate the price extraction logic
+            const extractedPrice = extractPriceFromText(currentPrice);
+            const numericValue = getNumericValue(extractedPrice);
+            
+            resultsContent.innerHTML = `
+                <p><strong>Original Text:</strong> "${currentPrice}"</p>
+                <p><strong>Extracted Price:</strong> "${extractedPrice || 'Not found'}"</p>
+                <p><strong>Numeric Value:</strong> ${numericValue}</p>
+                <p><strong>Status:</strong> ${extractedPrice ? '✅ Success' : '❌ Failed'}</p>
+            `;
+            
+            resultsDiv.style.display = 'block';
+            
+            console.log('Price Extraction Test Results:', {
+                original: currentPrice,
+                extracted: extractedPrice,
+                numeric: numericValue,
+                success: !!extractedPrice
+            });
+        }
+        
+        function testPriceChange() {
+            const priceElement = document.getElementById('price-element');
+            priceElement.textContent = 'CA$99';
+            priceElement.style.backgroundColor = '#e8f5e8';
+            priceElement.style.borderColor = '#4caf50';
+            testPriceExtraction();
+        }
+        
+        function resetPrice() {
+            const priceElement = document.getElementById('price-element');
+            priceElement.textContent = 'CA$129';
+            priceElement.style.backgroundColor = '#fff3e0';
+            priceElement.style.borderColor = '#ff9800';
+            document.getElementById('test-results').style.display = 'none';
+        }
+        
+        // Enhanced price extraction function (mirrors the updated content.js logic)
+        function extractPriceFromText(text) {
+            if (!text) return null;
+            
+            const pricePatterns = [
+                // Prefixed currencies like CA$129, US$99, AU$150
+                /(?:CA|US|AU|NZ|HK|SG)\$\s*\d+(?:[.,]\d{2})?/g,
+                // Standard currency symbols
+                /[\$€£¥₹₽]\s*\d+(?:[.,]\d{2})?/g,
+                // Numbers followed by currency symbols
+                /\d+(?:[.,]\d{2})?\s*[\$€£¥₹₽]/g,
+                // Numbers followed by currency codes
+                /\d+(?:[.,]\d{2})?\s*(?:USD|EUR|GBP|JPY|INR|CAD|AUD|CHF|CNY|SEK|NOK|DKK|PLN|CZK|HUF|RUB)/gi
+            ];
+            
+            for (const pattern of pricePatterns) {
+                const matches = text.match(pattern);
+                if (matches && matches.length > 0) {
+                    return matches[0].trim();
+                }
+            }
+            
+            return null;
+        }
+        
+        // Enhanced numeric value extraction
+        function getNumericValue(priceString) {
+            if (!priceString) return 0;
+            
+            // Remove currency prefixes (CA$, US$, etc.) and symbols
+            const cleanedPrice = priceString.replace(/(?:CA|US|AU|NZ|HK|SG)\$|[^\d.,]/g, '');
+            
+            // Handle different number formats
+            if (cleanedPrice.includes(',') && cleanedPrice.includes('.')) {
+                // Format like 1,299.99 - comma as thousands separator
+                const match = cleanedPrice.match(/[\d,]+\.?\d*/);
+                return match ? parseFloat(match[0].replace(/,/g, '')) : 0;
+            } else if (cleanedPrice.includes(',')) {
+                // Could be either thousands separator or decimal separator
+                const parts = cleanedPrice.split(',');
+                if (parts.length === 2 && parts[1].length <= 2) {
+                    // Likely decimal separator (e.g., "29,99")
+                    return parseFloat(cleanedPrice.replace(',', '.'));
+                } else {
+                    // Likely thousands separator (e.g., "1,299")
+                    return parseFloat(cleanedPrice.replace(/,/g, ''));
+                }
+            } else {
+                // Simple number with just dots
+                const match = cleanedPrice.match(/\d+(?:\.\d{2})?/);
+                return match ? parseFloat(match[0]) : 0;
+            }
+        }
+        
+        // Run initial test on page load
+        window.addEventListener('load', () => {
+            console.log('🧪 Canadian Dollar Test Page Loaded');
+            console.log('Testing CA$ price extraction...');
+            
+            // Test all formats
+            testPrices.forEach((price, index) => {
+                const extracted = extractPriceFromText(price);
+                const numeric = getNumericValue(extracted);
+                console.log(`Test ${index + 1}: "${price}" → "${extracted}" → ${numeric}`);
+            });
+        });
+    </script>
+</body>
+</html> 

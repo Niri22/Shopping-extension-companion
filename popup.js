@@ -402,22 +402,39 @@ class ShoppingExtensionPopup {
     
     createProductItemHTML(product) {
         const dateAdded = new Date(product.dateAdded).toLocaleDateString();
-        const truncatedTitle = product.title.length > 50 ? 
-            product.title.substring(0, 50) + '...' : product.title;
-        const truncatedUrl = product.url.length > 40 ? 
-            product.url.substring(0, 40) + '...' : product.url;
+        const truncatedTitle = product.title.length > 45 ? 
+            product.title.substring(0, 45) + '...' : product.title;
+        const domain = this.extractDomain(product.url);
         
         return `
             <div class="list-item" data-product-id="${product.id}">
-                <div class="item-header">
-                    <h4 class="item-title" title="${product.title}">${truncatedTitle}</h4>
-                    <span class="item-price">${product.price}</span>
-                </div>
-                <div class="item-url" title="${product.url}">${truncatedUrl}</div>
-                <div class="item-date">Added: ${dateAdded}</div>
-                <div class="item-actions">
-                    <button class="visit-btn" data-url="${product.url}">Visit</button>
-                    <button class="remove-btn" data-product-id="${product.id}">Remove</button>
+                <div class="item-content">
+                    <div class="item-details">
+                        <div class="item-main">
+                            <h4 class="item-title" title="${product.title}">${truncatedTitle}</h4>
+                            <span class="item-price">${product.price}</span>
+                        </div>
+                        <div class="item-meta">
+                            <span class="item-domain">${domain}</span>
+                            <span class="item-date">${dateAdded}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="item-actions">
+                        <button class="remove-btn" data-product-id="${product.id}" title="Remove from wishlist">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                            </svg>
+                            <span>Remove</span>
+                        </button>
+                        
+                        <button class="visit-btn" data-url="${product.url}" title="Visit product page">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                            </svg>
+                            <span>View</span>
+                        </button>
+                    </div>
                 </div>
             </div>
         `;
@@ -427,7 +444,10 @@ class ShoppingExtensionPopup {
         // Remove buttons
         this.elements.savedList?.querySelectorAll('.remove-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
-                const productId = e.target.dataset.productId;
+                e.preventDefault();
+                e.stopPropagation();
+                // Get product ID from button element (not the clicked target which might be child element)
+                const productId = btn.dataset.productId;
                 this.handleRemoveFromList(productId);
             });
         });
@@ -435,7 +455,10 @@ class ShoppingExtensionPopup {
         // Visit buttons
         this.elements.savedList?.querySelectorAll('.visit-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
-                const url = e.target.dataset.url;
+                e.preventDefault();
+                e.stopPropagation();
+                // Get URL from button element (not the clicked target which might be child element)
+                const url = btn.dataset.url;
                 this.handleVisitProduct(url);
             });
         });

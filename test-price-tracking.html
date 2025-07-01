@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Product - Wireless Headphones</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .product-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin: 20px 0;
+        }
+        .product-title {
+            font-size: 2em;
+            color: #333;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #007cba;
+            padding-bottom: 10px;
+        }
+        .price-section {
+            background: #e8f4f8;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .current-price {
+            font-size: 2.5em;
+            color: #d73502;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .original-price {
+            font-size: 1.2em;
+            color: #666;
+            text-decoration: line-through;
+            margin-right: 10px;
+        }
+        .discount {
+            background: #28a745;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .product-details {
+            margin: 20px 0;
+            line-height: 1.6;
+        }
+        .test-instructions {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .price-change-test {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 10px 0;
+        }
+        button {
+            background: #007cba;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #005a8b;
+        }
+    </style>
+</head>
+<body>
+    <div class="product-container">
+        <h1 class="product-title">Premium Wireless Noise-Canceling Headphones</h1>
+        
+        <div class="price-section">
+            <div class="original-price">$149.99</div>
+            <div class="current-price" id="currentPrice">$89.99</div>
+            <span class="discount">40% OFF</span>
+        </div>
+        
+        <div class="product-details">
+            <h3>Product Features:</h3>
+            <ul>
+                <li>Active Noise Cancellation Technology</li>
+                <li>30-hour battery life</li>
+                <li>Premium leather ear cushions</li>
+                <li>Bluetooth 5.0 connectivity</li>
+                <li>Quick charge: 5 minutes = 3 hours playback</li>
+                <li>Compatible with voice assistants</li>
+            </ul>
+            
+            <h3>Specifications:</h3>
+            <ul>
+                <li>Driver size: 40mm</li>
+                <li>Frequency response: 20Hz - 20kHz</li>
+                <li>Impedance: 32 ohms</li>
+                <li>Weight: 250g</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="test-instructions">
+        <h2>🧪 Price Tracking Test Instructions</h2>
+        <p><strong>This page is designed to test the new daily price tracking feature!</strong></p>
+        
+        <h3>Step 1: Test Basic Extension</h3>
+        <ol>
+            <li>Click the extension icon in your Chrome toolbar</li>
+            <li>Click "Current Tab" to extract this page's information</li>
+            <li>Verify it detects: Title and Price ($89.99)</li>
+            <li>Click "Add to List" to save this product</li>
+        </ol>
+        
+        <h3>Step 2: Test Price Changes</h3>
+        <p>Use the buttons below to simulate price changes:</p>
+        <button onclick="changePrice('$79.99', 'Price Drop!')">📉 Drop to $79.99</button>
+        <button onclick="changePrice('$99.99', 'Price Increase')">📈 Increase to $99.99</button>
+        <button onclick="changePrice('$89.99', 'Back to Original')">🔄 Reset to $89.99</button>
+        
+        <div id="priceChangeStatus" class="price-change-test" style="display: none;">
+            <strong>Price Changed!</strong> <span id="statusMessage"></span>
+            <br><small>Now test the extension again to see if it detects the new price.</small>
+        </div>
+    </div>
+
+    <div class="test-instructions">
+        <h2>🔍 Testing Price Tracking Features</h2>
+        
+        <div class="price-change-test">
+            <h4>Manual Price Check Test:</h4>
+            <p>Open Chrome DevTools (F12) and run this in the Console:</p>
+            <code>
+                chrome.runtime.sendMessage({action: 'triggerPriceCheck'}).then(response => console.log('Manual check result:', response));
+            </code>
+        </div>
+        
+        <div class="price-change-test">
+            <h4>Price History Test:</h4>
+            <p>After adding the product, check its price history:</p>
+            <code>
+                chrome.runtime.sendMessage({action: 'getPriceHistory', productId: 'your-product-id'}).then(response => console.log('Price history:', response));
+            </code>
+        </div>
+        
+        <div class="price-change-test">
+            <h4>Price Drops Test:</h4>
+            <p>Check for products with recent price drops:</p>
+            <code>
+                chrome.runtime.sendMessage({action: 'getProductsWithPriceDrops', daysBack: 7}).then(response => console.log('Products with drops:', response));
+            </code>
+        </div>
+    </div>
+
+    <div class="test-instructions">
+        <h2>✅ Expected Results</h2>
+        <ul>
+            <li><strong>Extension popup</strong> should detect the title and current price</li>
+            <li><strong>Price changes</strong> should be detected when you change the price and test again</li>
+            <li><strong>Daily alarms</strong> should be set up automatically (check Chrome DevTools → Application → Service Workers)</li>
+            <li><strong>Background script</strong> should respond to manual price check messages</li>
+            <li><strong>Price history</strong> should track changes over time</li>
+        </ul>
+    </div>
+
+    <script>
+        function changePrice(newPrice, message) {
+            document.getElementById('currentPrice').textContent = newPrice;
+            document.getElementById('statusMessage').textContent = message + ' - New price: ' + newPrice;
+            document.getElementById('priceChangeStatus').style.display = 'block';
+            
+            // Hide the status message after 5 seconds
+            setTimeout(() => {
+                document.getElementById('priceChangeStatus').style.display = 'none';
+            }, 5000);
+        }
+        
+        // Add some structured data for better price extraction
+        const structuredData = {
+            "@context": "https://schema.org/",
+            "@type": "Product",
+            "name": "Premium Wireless Noise-Canceling Headphones",
+            "offers": {
+                "@type": "Offer",
+                "price": "89.99",
+                "priceCurrency": "USD"
+            }
+        };
+        
+        const script = document.createElement('script');
+        script.type = 'application/ld+json';
+        script.textContent = JSON.stringify(structuredData);
+        document.head.appendChild(script);
+        
+        console.log('🎧 Test page loaded! Price tracking test page ready.');
+        console.log('📊 Current price:', document.getElementById('currentPrice').textContent);
+    </script>
+</body>
+</html> 

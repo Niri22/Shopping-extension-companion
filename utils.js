@@ -61,8 +61,18 @@ const ExtensionUtils = {
         isValid(price) {
             if (!price || typeof price !== 'string') return false;
             
-            const pricePattern = /[\$€£¥₹₽]\s*\d+(?:[.,]\d{2})?|\d+(?:[.,]\d{2})?\s*[\$€£¥₹₽]/;
-            return pricePattern.test(price.trim()) && 
+            // Enhanced pattern to include CA$, US$, AU$, etc.
+            const pricePatterns = [
+                /(?:CA|US|AU|NZ|HK|SG)\$\s*\d+(?:[.,]\d{2})?/,
+                /[\$€£¥₹₽]\s*\d+(?:[.,]\d{2})?/,
+                /\d+(?:[.,]\d{2})?\s*[\$€£¥₹₽]/,
+                /\d+(?:[.,]\d{2})?\s*(?:USD|EUR|GBP|JPY|INR|CAD|AUD|CHF|CNY|SEK|NOK|DKK|PLN|CZK|HUF|RUB)/i
+            ];
+            
+            const trimmedPrice = price.trim();
+            const hasValidPattern = pricePatterns.some(pattern => pattern.test(trimmedPrice));
+            
+            return hasValidPattern && 
                    !price.includes('Loading') && 
                    !price.includes('loading') &&
                    !price.includes('...') &&
@@ -86,8 +96,30 @@ const ExtensionUtils = {
          */
         getNumericValue(priceString) {
             if (!priceString) return 0;
-            const match = priceString.match(/\d+(?:[.,]\d{2})?/);
-            return match ? parseFloat(match[0].replace(',', '.')) : 0;
+            
+            // Remove currency prefixes (CA$, US$, etc.) and symbols
+            const cleanedPrice = priceString.replace(/(?:CA|US|AU|NZ|HK|SG)\$|[^\d.,]/g, '');
+            
+            // Handle different number formats
+            if (cleanedPrice.includes(',') && cleanedPrice.includes('.')) {
+                // Format like 1,299.99 - comma as thousands separator
+                const match = cleanedPrice.match(/[\d,]+\.?\d*/);
+                return match ? parseFloat(match[0].replace(/,/g, '')) : 0;
+            } else if (cleanedPrice.includes(',')) {
+                // Could be either thousands separator or decimal separator
+                const parts = cleanedPrice.split(',');
+                if (parts.length === 2 && parts[1].length <= 2) {
+                    // Likely decimal separator (e.g., "29,99")
+                    return parseFloat(cleanedPrice.replace(',', '.'));
+                } else {
+                    // Likely thousands separator (e.g., "1,299")
+                    return parseFloat(cleanedPrice.replace(/,/g, ''));
+                }
+            } else {
+                // Simple number with just dots
+                const match = cleanedPrice.match(/\d+(?:\.\d{2})?/);
+                return match ? parseFloat(match[0]) : 0;
+            }
         }
     },
     
@@ -175,14 +207,24 @@ const ExtensionUtils = {
             if (!text) return null;
             
             const pricePatterns = [
+                // Prefixed currencies like CA$129, US$99, AU$150
+                /(?:CA|US|AU|NZ|HK|SG)\$\s*\d+(?:[.,]\d{2})?/g,
+                // Standard currency symbols
                 /\$\s*\d+(?:[.,]\d{2})?/g,
                 /€\s*\d+(?:[.,]\d{2})?/g,
                 /£\s*\d+(?:[.,]\d{2})?/g,
                 /¥\s*\d+(?:[.,]\d{2})?/g,
                 /₹\s*\d+(?:[.,]\d{2})?/g,
+                /₽\s*\d+(?:[.,]\d{2})?/g,
+                // Numbers followed by currency symbols
                 /\d+(?:[.,]\d{2})?\s*\$/g,
                 /\d+(?:[.,]\d{2})?\s*€/g,
-                /\d+(?:[.,]\d{2})?\s*£/g
+                /\d+(?:[.,]\d{2})?\s*£/g,
+                /\d+(?:[.,]\d{2})?\s*¥/g,
+                /\d+(?:[.,]\d{2})?\s*₹/g,
+                /\d+(?:[.,]\d{2})?\s*₽/g,
+                // Currency codes
+                /\d+(?:[.,]\d{2})?\s*(?:USD|EUR|GBP|JPY|INR|CAD|AUD|CHF|CNY|SEK|NOK|DKK|PLN|CZK|HUF|RUB)/gi
             ];
             
             for (const pattern of pricePatterns) {

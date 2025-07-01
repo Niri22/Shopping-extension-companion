@@ -1,7 +1,7 @@
 {
-  "name": "page-title-price-fetcher",
+  "name": "wishcart",
   "version": "1.1.0",
-  "description": "A Chrome extension that fetches and displays the title and price of any webpage",
+  "description": "WishCart - A modern Chrome extension for smart shopping with wishlist management and automatic price tracking",
   "main": "popup.js",
   "scripts": {
     "test": "jest",
@@ -13,10 +13,13 @@
   },
   "keywords": [
     "chrome-extension",
-    "price-extraction",
-    "web-scraping",
+    "wishlist",
+    "price-tracking",
+    "shopping",
     "e-commerce",
-    "title-fetcher"
+    "price-monitoring",
+    "deals",
+    "shopping-assistant"
   ],
   "author": "Your Name",
   "license": "MIT",
