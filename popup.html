@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page Title & Price Fetcher</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Page Title & Price Fetcher</h1>
+        
+        <!-- Input section for URL -->
+        <div class="input-section">
+            <label for="urlInput">Enter URL:</label>
+            <input type="url" id="urlInput" placeholder="https://example.com" />
+            <button id="fetchBtn">Get Title & Price</button>
+        </div>
+        
+        <!-- Button to get current tab's title and price -->
+        <div class="current-tab-section">
+            <button id="currentTabBtn">Get Current Tab Info</button>
+        </div>
+        
+        <!-- Loading indicator -->
+        <div id="loading" class="loading hidden">
+            <span>Loading...</span>
+        </div>
+        
+        <!-- Results section -->
+        <div id="result" class="result hidden">
+            <h3>Page Information:</h3>
+            <div class="info-item">
+                <strong>Title:</strong>
+                <p id="titleText"></p>
+            </div>
+            <div class="info-item">
+                <strong>Price:</strong>
+                <p id="priceText" class="price-text"></p>
+            </div>
+            <div class="info-item">
+                <strong>URL:</strong>
+                <p id="urlText" class="url-text"></p>
+            </div>
+        </div>
+        
+        <!-- Error section -->
+        <div id="error" class="error hidden">
+            <p id="errorText"></p>
+        </div>
+    </div>
+    
+    <!-- Include the configuration, utilities, and popup JavaScript -->
+    <script src="config.js"></script>
+    <script src="utils.js"></script>
+    <script src="popup.js"></script>
+</body>
+</html> 
