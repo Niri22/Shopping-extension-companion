@@ -22,6 +22,14 @@ global.chrome = {
       addListener: jest.fn(),
       removeListener: jest.fn()
     }
+  },
+  storage: {
+    local: {
+      get: jest.fn(),
+      set: jest.fn(),
+      remove: jest.fn(),
+      clear: jest.fn()
+    }
   }
 };
 
@@ -32,7 +40,12 @@ global.document = {
   querySelector: jest.fn(),
   querySelectorAll: jest.fn(),
   addEventListener: jest.fn(),
-  removeEventListener: jest.fn()
+  removeEventListener: jest.fn(),
+  createElement: jest.fn(),
+  body: {
+    appendChild: jest.fn(),
+    removeChild: jest.fn()
+  }
 };
 
 global.window = {
@@ -63,8 +76,17 @@ if (!global.URL) {
       this.hostname = match[2].split('/')[0];
       this.href = url;
     }
+    
+    static createObjectURL = jest.fn(() => 'blob:mock-url');
+    static revokeObjectURL = jest.fn();
   };
 }
+
+// Mock Blob for file operations
+global.Blob = jest.fn((content, options) => ({
+  size: content ? content.join('').length : 0,
+  type: options?.type || 'text/plain'
+}));
 
 // Mock console methods to reduce test noise
 global.console = {

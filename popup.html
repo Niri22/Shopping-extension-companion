@@ -14,12 +14,12 @@
         <div class="input-section">
             <label for="urlInput">Enter URL:</label>
             <input type="url" id="urlInput" placeholder="https://example.com" />
-            <button id="fetchBtn">Get Title & Price</button>
+            <button id="fetchBtn" data-action="fetch-info">Get Title & Price</button>
         </div>
         
         <!-- Button to get current tab's title and price -->
         <div class="current-tab-section">
-            <button id="currentTabBtn">Get Current Tab Info</button>
+            <button id="currentTabBtn" data-action="current-tab">Get Current Tab Info</button>
         </div>
         
         <!-- Loading indicator -->
@@ -42,17 +42,54 @@
                 <strong>URL:</strong>
                 <p id="urlText" class="url-text"></p>
             </div>
+            <div class="action-buttons">
+                <button id="addToListBtn" class="add-to-list-btn" data-action="add-to-list">Add to List</button>
+            </div>
         </div>
         
         <!-- Error section -->
         <div id="error" class="error hidden">
             <p id="errorText"></p>
         </div>
+
+        <!-- Saved Products List -->
+        <div class="list-section">
+            <div class="list-header">
+                <button id="listToggle" class="list-toggle-btn" data-action="toggle-list">
+                    <span id="listCount" class="list-count">0</span> Saved Products
+                    <span class="toggle-icon">▼</span>
+                </button>
+            </div>
+            
+            <div id="listContainer" class="list-container hidden">
+                <div class="list-controls">
+                    <button id="clearListBtn" class="clear-btn" data-action="clear-list">Clear All</button>
+                    <button id="exportListBtn" class="export-btn" data-action="export-list">Export</button>
+                </div>
+                
+                <div id="savedList" class="saved-list">
+                    <div class="empty-list">
+                        <p>Your product list is empty</p>
+                        <p class="hint">Add products using the "Add to List" button above</p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     
     <!-- Include the configuration, utilities, and popup JavaScript -->
+    <!-- Core Services -->
+    <script src="services/PerformanceManager.js"></script>
+    <script src="services/EventBus.js"></script>
+    <script src="services/StorageService.js"></script>
+    <script src="services/UIController.js"></script>
+    <script src="services/AppController.js"></script>
+    
+    <!-- Configuration & Utilities -->
     <script src="config.js"></script>
     <script src="utils.js"></script>
+    
+    <!-- Main Application -->
     <script src="popup.js"></script>
 </body>
 </html> 

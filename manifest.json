@@ -5,7 +5,7 @@
   "description": "A Chrome extension that fetches and displays the title and price of any webpage",
   "action": {
     "default_popup": "popup.html",
-    "default_title": "Page Title & Price Fetcher"
+    "default_title": "Page Title & Price Fetcher - Optimized"
   },
   "content_scripts": [
     {
@@ -15,7 +15,8 @@
   ],
   "permissions": [
     "activeTab",
-    "tabs"
+    "tabs",
+    "storage"
   ],
   "host_permissions": [
     "http://*/*",

@@ -1,14 +1,18 @@
-# Page Title Fetcher Chrome Extension
+# Shopping Extension Companion
 
-A simple Chrome extension that fetches and displays the title of any webpage provided by the user. This extension demonstrates basic Chrome extension development concepts including popup UI, content scripts, and the Chrome tabs API.
+A comprehensive Chrome extension that fetches page titles and product prices from e-commerce websites, with an integrated product list management system. This extension demonstrates advanced Chrome extension development including storage APIs, content scripts, and modern JavaScript architecture.
 
 ## Features
 
-- **Fetch Page Title from URL**: Enter any URL and get its page title
-- **Current Tab Title**: Get the title of the currently active tab
-- **Clean UI**: Modern, responsive popup interface
-- **Error Handling**: Proper validation and error messages
-- **Loading States**: Visual feedback during operations
+- **Page Title & Price Extraction**: Automatically extracts titles and prices from e-commerce sites
+- **Multi-site Support**: Works with Amazon, eBay, Shopify, WooCommerce, and more
+- **Product List Management**: Save, organize, and manage your favorite products
+- **Persistent Storage**: Products saved locally using Chrome's storage API
+- **Smart Retry Logic**: Handles dynamic content loading with progressive retry
+- **Current Tab Integration**: Extract information from currently active tab
+- **Export Functionality**: Export your product list as JSON
+- **Modern UI**: Clean, responsive interface with animations and feedback
+- **Error Handling**: Comprehensive validation and error messages
 
 ## Files Structure
 
@@ -19,6 +23,10 @@ Shopping-extension-companion/
 ├── popup.js           # Popup functionality and logic
 ├── content.js         # Content script for page interaction
 ├── styles.css         # Popup styling
+├── config.js          # Centralized configuration
+├── utils.js           # Shared utility functions
+├── test/              # Comprehensive test suite
+├── ARCHITECTURE.md    # Technical architecture documentation
 └── README.md          # This file
 ```
 
@@ -82,17 +90,26 @@ CSS styling for a modern, clean popup interface with:
 
 ## How to Use
 
-### Method 1: Fetch Title from URL
+### Method 1: Get Title & Price from URL
 1. Click the extension icon in your Chrome toolbar
 2. Enter a complete URL (including http:// or https://)
-3. Click "Get Title" button
-4. The page title will be displayed along with the URL
+3. Click "Get Title & Price" button
+4. The page title and price will be displayed along with the URL
+5. Click "Add to List" to save the product to your collection
 
-### Method 2: Get Current Tab Title
-1. Navigate to any webpage
+### Method 2: Get Current Tab Info
+1. Navigate to any e-commerce webpage
 2. Click the extension icon
-3. Click "Get Current Tab Title" button
-4. The current page's title and URL will be displayed
+3. Click "Get Current Tab Info" button
+4. The current page's title, price, and URL will be displayed
+5. Click "Add to List" to save the product
+
+### Method 3: Manage Your Product List
+1. Click the product count badge to expand/collapse your saved list
+2. Use "Visit" button to open any saved product in a new tab
+3. Use "Remove" button to delete individual products
+4. Use "Clear All" to empty your entire list (with confirmation)
+5. Use "Export" to download your list as a JSON file
 
 ## Key Functions Explained
 
@@ -135,6 +152,7 @@ The extension includes comprehensive error handling for:
 
 - **`activeTab`**: Allows access to the currently active tab
 - **`tabs`**: Enables creating, querying, and managing tabs
+- **`storage`**: Enables saving and retrieving product list data locally
 - **`host_permissions`**: Allows access to all HTTP and HTTPS websites
 
 ## Development Notes

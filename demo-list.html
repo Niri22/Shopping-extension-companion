@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Extension Demo - Product List Feature</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .demo-container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .feature-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            background: #f8f9fa;
+        }
+        .feature-title {
+            color: #007bff;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        .feature-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        .feature-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .feature-list li:last-child {
+            border-bottom: none;
+        }
+        .feature-list li::before {
+            content: "✓";
+            color: #28a745;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .demo-note {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 20px;
+        }
+        .code-block {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            margin: 10px 0;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <h1>🛍️ Shopping Extension - Product List Feature</h1>
+        
+        <div class="feature-section">
+            <div class="feature-title">📋 New List Management Features</div>
+            <ul class="feature-list">
+                <li>Save products with title, price, and URL to a persistent list</li>
+                <li>Toggle list visibility with expandable/collapsible interface</li>
+                <li>Remove individual products from the list</li>
+                <li>Clear all products with confirmation dialog</li>
+                <li>Export product list as JSON file</li>
+                <li>Product count badge showing number of saved items</li>
+                <li>Visit product URLs directly from the list</li>
+                <li>Automatic product validation before adding to list</li>
+            </ul>
+        </div>
+
+        <div class="feature-section">
+            <div class="feature-title">💾 Storage & Persistence</div>
+            <ul class="feature-list">
+                <li>Uses Chrome's local storage API for data persistence</li>
+                <li>Supports up to 100 saved products (configurable)</li>
+                <li>Automatic duplicate detection and updates</li>
+                <li>Date tracking for when products were added/updated</li>
+                <li>Graceful error handling for storage operations</li>
+            </ul>
+        </div>
+
+        <div class="feature-section">
+            <div class="feature-title">🎨 User Interface Enhancements</div>
+            <ul class="feature-list">
+                <li>Modern, responsive design with smooth animations</li>
+                <li>Success/error messages with auto-fade</li>
+                <li>"Add to List" button with validation states</li>
+                <li>Expandable list section with toggle animation</li>
+                <li>Product cards with truncated titles and URLs</li>
+                <li>Action buttons for visit and remove operations</li>
+            </ul>
+        </div>
+
+        <div class="feature-section">
+            <div class="feature-title">🔧 Technical Implementation</div>
+            <div class="code-block">
+// Storage configuration in config.js
+storage: {
+    keys: {
+        productList: 'saved_products',
+        settings: 'extension_settings'
+    },
+    maxItems: 100,
+    maxTitleLength: 100,
+    maxPriceLength: 20
+}
+
+// Storage utilities in utils.js
+ExtensionUtils.storage = {
+    async saveProduct(product) { /* ... */ },
+    async getProducts() { /* ... */ },
+    async removeProduct(productId) { /* ... */ },
+    async clearProducts() { /* ... */ },
+    async exportProducts() { /* ... */ }
+}
+            </div>
+        </div>
+
+        <div class="feature-section">
+            <div class="feature-title">📱 How to Use</div>
+            <ol style="padding-left: 20px;">
+                <li>Load the extension in Chrome (chrome://extensions/)</li>
+                <li>Navigate to any product page or enter a URL</li>
+                <li>Click "Get Title & Price" or "Get Current Tab Info"</li>
+                <li>If valid product info is found, click "Add to List"</li>
+                <li>Click the product count badge to show/hide your saved list</li>
+                <li>Use "Visit" to open products or "Remove" to delete them</li>
+                <li>Export your list or clear all products as needed</li>
+            </ol>
+        </div>
+
+        <div class="demo-note">
+            <strong>Note:</strong> This is a demonstration page showing the new product list features. 
+            The actual functionality is implemented in the Chrome extension popup interface. 
+            Load the extension and try it on real e-commerce sites like Amazon, eBay, or any online store!
+        </div>
+    </div>
+</body>
+</html> 

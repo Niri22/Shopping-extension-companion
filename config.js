@@ -121,7 +121,9 @@ const ExtensionConfig = {
             hidden: 'hidden',
             priceFound: 'price-found',
             loading: 'loading',
-            error: 'error'
+            error: 'error',
+            listItem: 'list-item',
+            removeBtn: 'remove-btn'
         },
         
         // Element IDs
@@ -135,7 +137,14 @@ const ExtensionConfig = {
             titleText: 'titleText',
             priceText: 'priceText',
             urlText: 'urlText',
-            errorText: 'errorText'
+            errorText: 'errorText',
+            addToListBtn: 'addToListBtn',
+            savedList: 'savedList',
+            listContainer: 'listContainer',
+            listToggle: 'listToggle',
+            clearListBtn: 'clearListBtn',
+            exportListBtn: 'exportListBtn',
+            listCount: 'listCount'
         }
     },
     
@@ -159,19 +168,62 @@ const ExtensionConfig = {
         notFound: {
             title: 'No title found',
             price: 'No price found'
+        },
+        
+        success: {
+            addedToList: 'Product added to your list!',
+            removedFromList: 'Product removed from list',
+            listCleared: 'List cleared successfully',
+            listExported: 'List exported successfully'
+        },
+        
+        list: {
+            empty: 'Your product list is empty',
+            title: 'Saved Products',
+            addButton: 'Add to List',
+            removeButton: 'Remove',
+            clearAll: 'Clear All',
+            exportList: 'Export List',
+            showList: 'Show List',
+            hideList: 'Hide List'
         }
     },
     
     // Chrome extension permissions and manifest settings
     permissions: {
-        required: ['tabs', 'activeTab'],
-        optional: ['storage']
+        required: ['tabs', 'activeTab', 'storage'],
+        optional: []
+    },
+    
+    // Storage configuration
+    storage: {
+        keys: {
+            productList: 'saved_products',
+            settings: 'extension_settings'
+        },
+        maxItems: 100, // Maximum number of saved products
+        maxTitleLength: 100,
+        maxPriceLength: 20
+    },
+    
+    // Performance optimization settings
+    performance: {
+        enableCaching: true,
+        cacheTimeout: 300000, // 5 minutes
+        maxCacheSize: 100,
+        enableDebouncing: true,
+        debounceDelay: 300,
+        enableVirtualScrolling: true,
+        batchSize: 20,
+        enableLazyLoading: true,
+        memoryThreshold: 50 // MB
     },
     
     // Debug settings
     debug: {
         enabled: false,
-        logLevel: 'info' // 'debug', 'info', 'warn', 'error'
+        logLevel: 'info', // 'debug', 'info', 'warn', 'error'
+        enablePerformanceLogging: false
     }
 };
 

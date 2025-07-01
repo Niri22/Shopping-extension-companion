@@ -168,6 +168,255 @@ button:active {
     display: none;
 }
 
+/* Action buttons */
+.action-buttons {
+    margin-top: 15px;
+    text-align: center;
+}
+
+.add-to-list-btn {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(40, 167, 69, 0.3);
+    width: auto;
+    margin-bottom: 0;
+}
+
+.add-to-list-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(40, 167, 69, 0.4);
+}
+
+.add-to-list-btn:active {
+    transform: translateY(0);
+}
+
+.add-to-list-btn:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* List section */
+.list-section {
+    margin-top: 20px;
+    border-top: 1px solid #e9ecef;
+    padding-top: 15px;
+}
+
+.list-header {
+    margin-bottom: 10px;
+}
+
+.list-toggle-btn {
+    width: 100%;
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    padding: 12px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    color: #495057;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.3s ease;
+    margin-bottom: 0;
+}
+
+.list-toggle-btn:hover {
+    background: #e9ecef;
+    border-color: #ced4da;
+}
+
+.list-count {
+    background: #007bff;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 700;
+    margin-right: 8px;
+}
+
+.toggle-icon {
+    transition: transform 0.3s ease;
+}
+
+.list-toggle-btn.expanded .toggle-icon {
+    transform: rotate(180deg);
+}
+
+.list-container {
+    margin-top: 10px;
+    max-height: 400px;
+    overflow-y: auto;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    background: white;
+}
+
+.list-controls {
+    padding: 10px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+    display: flex;
+    gap: 10px;
+}
+
+.clear-btn, .export-btn {
+    flex: 1;
+    padding: 6px 12px;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    background: white;
+    color: #495057;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.2s ease;
+    margin-bottom: 0;
+}
+
+.clear-btn:hover {
+    background: #dc3545;
+    color: white;
+    border-color: #dc3545;
+}
+
+.export-btn:hover {
+    background: #17a2b8;
+    color: white;
+    border-color: #17a2b8;
+}
+
+.saved-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.empty-list {
+    padding: 30px 20px;
+    text-align: center;
+    color: #6c757d;
+}
+
+.empty-list p {
+    margin: 5px 0;
+}
+
+.hint {
+    font-size: 12px;
+    color: #adb5bd;
+}
+
+/* List items */
+.list-item {
+    padding: 12px 15px;
+    border-bottom: 1px solid #f1f3f4;
+    transition: background-color 0.2s ease;
+}
+
+.list-item:hover {
+    background: #f8f9fa;
+}
+
+.list-item:last-child {
+    border-bottom: none;
+}
+
+.item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 8px;
+}
+
+.item-title {
+    font-weight: 600;
+    color: #212529;
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.4;
+    flex: 1;
+    margin-right: 10px;
+}
+
+.item-price {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.item-url {
+    color: #6c757d;
+    font-size: 12px;
+    margin: 5px 0;
+    word-break: break-all;
+    line-height: 1.3;
+}
+
+.item-date {
+    color: #adb5bd;
+    font-size: 11px;
+    margin-bottom: 8px;
+}
+
+.item-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.visit-btn, .remove-btn {
+    padding: 4px 8px;
+    border: 1px solid #dee2e6;
+    border-radius: 3px;
+    background: white;
+    color: #495057;
+    cursor: pointer;
+    font-size: 11px;
+    transition: all 0.2s ease;
+}
+
+.visit-btn:hover {
+    background: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+
+.remove-btn:hover {
+    background: #dc3545;
+    color: white;
+    border-color: #dc3545;
+}
+
+/* Success message */
+.success-message {
+    background: #d4edda;
+    color: #155724;
+    padding: 10px 15px;
+    border-radius: 6px;
+    margin: 10px 0;
+    border: 1px solid #c3e6cb;
+    animation: fadeInOut 3s ease-in-out;
+}
+
+@keyframes fadeInOut {
+    0%, 100% { opacity: 0; transform: translateY(-10px); }
+    10%, 90% { opacity: 1; transform: translateY(0); }
+}
+
 /* Responsive design for smaller screens */
 @media (max-width: 400px) {
     .container {
@@ -182,5 +431,22 @@ button:active {
     button {
         padding: 8px 16px;
         font-size: 13px;
+    }
+    
+    .list-item {
+        padding: 10px 12px;
+    }
+    
+    .item-title {
+        font-size: 13px;
+    }
+    
+    .item-actions {
+        flex-direction: column;
+        gap: 5px;
+    }
+    
+    .list-controls {
+        flex-direction: column;
     }
 } 

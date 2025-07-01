@@ -228,6 +228,148 @@ const ExtensionUtils = {
     },
     
     /**
+     * Storage utilities for managing saved products
+     */
+    storage: {
+        /**
+         * Saves a product to the stored list
+         * @param {object} product - Product object with title, price, url, domain
+         * @returns {Promise<boolean>} - Success status
+         */
+        async saveProduct(product) {
+            try {
+                const existingProducts = await this.getProducts();
+                const productId = this.generateProductId(product);
+                
+                // Check if product already exists
+                const existingIndex = existingProducts.findIndex(p => p.id === productId);
+                
+                if (existingIndex !== -1) {
+                    // Update existing product
+                    existingProducts[existingIndex] = {
+                        ...product,
+                        id: productId,
+                        dateAdded: existingProducts[existingIndex].dateAdded,
+                        dateUpdated: new Date().toISOString()
+                    };
+                } else {
+                    // Add new product
+                    const newProduct = {
+                        ...product,
+                        id: productId,
+                        dateAdded: new Date().toISOString(),
+                        dateUpdated: new Date().toISOString()
+                    };
+                    
+                    existingProducts.unshift(newProduct); // Add to beginning
+                    
+                    // Limit the number of stored products
+                    if (existingProducts.length > ExtensionConfig.storage.maxItems) {
+                        existingProducts.splice(ExtensionConfig.storage.maxItems);
+                    }
+                }
+                
+                await chrome.storage.local.set({
+                    [ExtensionConfig.storage.keys.productList]: existingProducts
+                });
+                
+                return true;
+            } catch (error) {
+                ExtensionUtils.log.error('Failed to save product', error);
+                return false;
+            }
+        },
+        
+        /**
+         * Gets all saved products
+         * @returns {Promise<Array>} - Array of saved products
+         */
+        async getProducts() {
+            try {
+                const result = await chrome.storage.local.get([ExtensionConfig.storage.keys.productList]);
+                return result[ExtensionConfig.storage.keys.productList] || [];
+            } catch (error) {
+                ExtensionUtils.log.error('Failed to get products', error);
+                return [];
+            }
+        },
+        
+        /**
+         * Removes a product from the stored list
+         * @param {string} productId - ID of the product to remove
+         * @returns {Promise<boolean>} - Success status
+         */
+        async removeProduct(productId) {
+            try {
+                const existingProducts = await this.getProducts();
+                const filteredProducts = existingProducts.filter(p => p.id !== productId);
+                
+                await chrome.storage.local.set({
+                    [ExtensionConfig.storage.keys.productList]: filteredProducts
+                });
+                
+                return true;
+            } catch (error) {
+                ExtensionUtils.log.error('Failed to remove product', error);
+                return false;
+            }
+        },
+        
+        /**
+         * Clears all saved products
+         * @returns {Promise<boolean>} - Success status
+         */
+        async clearProducts() {
+            try {
+                await chrome.storage.local.set({
+                    [ExtensionConfig.storage.keys.productList]: []
+                });
+                return true;
+            } catch (error) {
+                ExtensionUtils.log.error('Failed to clear products', error);
+                return false;
+            }
+        },
+        
+        /**
+         * Exports products as JSON
+         * @returns {Promise<string>} - JSON string of products
+         */
+        async exportProducts() {
+            try {
+                const products = await this.getProducts();
+                return JSON.stringify(products, null, 2);
+            } catch (error) {
+                ExtensionUtils.log.error('Failed to export products', error);
+                return '[]';
+            }
+        },
+        
+        /**
+         * Generates a unique ID for a product based on URL
+         * @param {object} product - Product object
+         * @returns {string} - Unique product ID
+         */
+        generateProductId(product) {
+            // Use URL as the primary identifier, fallback to title + domain
+            const identifier = product.url || `${product.title}-${product.domain}`;
+            return btoa(identifier).replace(/[^a-zA-Z0-9]/g, '').substring(0, 16);
+        },
+        
+        /**
+         * Validates a product object
+         * @param {object} product - Product to validate
+         * @returns {boolean} - True if valid
+         */
+        isValidProduct(product) {
+            return product && 
+                   product.title && 
+                   product.title.trim() !== '' &&
+                   product.title !== ExtensionConfig.messages.notFound.title;
+        }
+    },
+
+    /**
      * Chrome extension specific utilities
      */
     chrome: {
