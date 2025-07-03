@@ -181,7 +181,7 @@ function showHelp() {
   printHeader('Chrome Extension Test Runner');
   
   console.log(colorize('Usage:', 'bright'));
-  console.log('  node test/run-tests.js [command] [options]');
+  console.log('  node tests/run-tests.js [command] [options]');
   
   console.log(colorize('\nCommands:', 'bright'));
   console.log('  all         Run all tests with coverage and linting');
@@ -196,10 +196,10 @@ function showHelp() {
   console.log('  help        Show this help message');
   
   console.log(colorize('\nExamples:', 'bright'));
-  console.log('  node test/run-tests.js all');
-  console.log('  node test/run-tests.js file content.test.js');
-  console.log('  node test/run-tests.js pattern "URL Validation"');
-  console.log('  node test/run-tests.js watch');
+  console.log('  node tests/run-tests.js all');
+  console.log('  node tests/run-tests.js file content.test.js');
+  console.log('  node tests/run-tests.js pattern "URL Validation"');
+  console.log('  node tests/run-tests.js watch');
 }
 
 function main() {
@@ -254,7 +254,7 @@ function main() {
     case 'file':
       if (!args[1]) {
         console.log(colorize('Error: Please specify a test file', 'red'));
-        console.log('Usage: node test/run-tests.js file <filename>');
+        console.log('Usage: node tests/run-tests.js file <filename>');
         process.exit(1);
       }
       printHeader(`File Tests: ${args[1]}`);
@@ -265,7 +265,7 @@ function main() {
     case 'pattern':
       if (!args[1]) {
         console.log(colorize('Error: Please specify a test pattern', 'red'));
-        console.log('Usage: node test/run-tests.js pattern <pattern>');
+        console.log('Usage: node tests/run-tests.js pattern <pattern>');
         process.exit(1);
       }
       printHeader(`Pattern Tests: ${args[1]}`);

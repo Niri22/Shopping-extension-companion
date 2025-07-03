@@ -3,6 +3,9 @@
  * Global test configuration and mocks for Chrome Extension testing
  */
 
+// Import compatibility layer for new modular architecture
+require('./compatibility');
+
 // Mock Chrome Extension APIs globally
 global.chrome = {
   runtime: {
