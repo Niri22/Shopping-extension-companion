@@ -487,7 +487,7 @@ describe('Content Script - Message Handling', () => {
 });
 
 describe('Content Script - Page Loading State', () => {
-    test('should track page loading states correctly', () => {
+    test('should track page loading states correctly', (done) => {
         let pageLoadingState = {
             domLoaded: false,
             windowLoaded: false,
@@ -508,7 +508,8 @@ describe('Content Script - Page Loading State', () => {
         setTimeout(() => {
             pageLoadingState.dynamicContentReady = true;
             expect(pageLoadingState.dynamicContentReady).toBe(true);
-        }, 3000);
+            done(); // Signal test completion
+        }, 10); // Use shorter timeout for testing
     });
 
     test('should provide appropriate loading messages based on state', () => {

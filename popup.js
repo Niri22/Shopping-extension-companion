@@ -30,33 +30,56 @@ class ShoppingExtensionPopup {
     }
     
     bindElements() {
-        const elementIds = Object.values(ExtensionConfig.ui.elements);
+        // Only bind elements that exist in the current popup
+        const elementMap = {
+            loading: 'loading',
+            result: 'result',
+            error: 'error',
+            titleText: 'titleText',
+            priceText: 'priceText',
+            urlText: 'urlText',
+            errorText: 'errorText',
+            addToListBtn: 'addToListBtn',
+            savedList: 'savedList',
+            listContainer: 'listContainer',
+            clearListBtn: 'clearListBtn',
+            exportListBtn: 'exportListBtn'
+        };
         
-        elementIds.forEach(id => {
-            this.elements[id] = document.getElementById(id);
-            if (!this.elements[id]) {
+        Object.entries(elementMap).forEach(([key, id]) => {
+            this.elements[key] = document.getElementById(id);
+            if (!this.elements[key]) {
                 console.warn('⚠️ [Popup] Element not found:', id);
             }
         });
+        
+        // Add search and sort elements
+        this.elements.searchInput = document.getElementById('searchInput');
+        this.elements.sortSelect = document.getElementById('sortSelect');
+        this.elements.trackCurrentBtn = document.getElementById('trackCurrentBtn');
+        this.elements.refreshBtn = document.getElementById('refreshBtn');
         
         console.log('🔗 [Popup] Elements bound successfully');
     }
     
     setupEventListeners() {
         // Main action buttons
-        this.elements.fetchBtn?.addEventListener('click', () => this.handleFetchInfo());
-        this.elements.currentTabBtn?.addEventListener('click', () => this.handleCurrentTabInfo());
         this.elements.addToListBtn?.addEventListener('click', () => this.handleAddToList());
         
         // List management buttons
-        this.elements.listToggle?.addEventListener('click', () => this.toggleList());
         this.elements.clearListBtn?.addEventListener('click', () => this.handleClearList());
         this.elements.exportListBtn?.addEventListener('click', () => this.handleExportList());
+        this.elements.refreshBtn?.addEventListener('click', () => this.handleRefreshPrices());
         
-        // URL input handling
-        this.elements.urlInput?.addEventListener('keypress', (e) => {
+        // Search and sort functionality
+        this.elements.searchInput?.addEventListener('input', () => this.handleSearch());
+        this.elements.sortSelect?.addEventListener('change', () => this.handleSort());
+        this.elements.trackCurrentBtn?.addEventListener('click', () => this.handleTrackCurrent());
+        
+        // Search input handling
+        this.elements.searchInput?.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
-                this.handleFetchInfo();
+                this.handleSearch();
             }
         });
         
@@ -284,24 +307,101 @@ class ShoppingExtensionPopup {
         
         // Update UI elements
         if (this.elements.titleText) this.elements.titleText.textContent = title;
-        if (this.elements.priceText) this.elements.priceText.textContent = price;
+        
+        // Enhanced price display for sale information
+        if (this.elements.priceText) {
+            const priceDisplay = this.formatPriceDisplay(price);
+            this.elements.priceText.innerHTML = priceDisplay.html;
+            this.elements.priceText.className = `price-text ${priceDisplay.className}`;
+        }
+        
         if (this.elements.urlText) this.elements.urlText.textContent = url;
         
         // Store current page info for adding to list
         this.currentPageInfo = {
             title,
-            price,
+            price: this.extractPriceForStorage(price),
             url,
-            domain: this.extractDomain(url)
+            domain: this.extractDomain(url),
+            saleInfo: this.extractSaleInfo(price)
         };
         
         // Update add to list button state
         this.updateAddToListButton();
-        
-        // Highlight price if found
-        if (this.elements.priceText) {
-            this.elements.priceText.classList.toggle('price-found', ExtensionUtils.price.isValid(price));
+    }
+
+    formatPriceDisplay(price) {
+        // Handle enhanced price info structure
+        if (typeof price === 'object' && price !== null) {
+            if (price.isOnSale) {
+                return {
+                    html: this.createSalePriceHTML(price),
+                    className: 'price-found sale-price'
+                };
+            } else {
+                return {
+                    html: `<span class="current-price">${price.currentPrice || price.displayText}</span>`,
+                    className: 'price-found'
+                };
+            }
+        } else if (typeof price === 'string') {
+            const isValid = ExtensionUtils.price.isValid(price);
+            return {
+                html: `<span class="current-price">${price}</span>`,
+                className: isValid ? 'price-found' : 'price-not-found'
+            };
         }
+        
+        return {
+            html: '<span class="current-price">No price found</span>',
+            className: 'price-not-found'
+        };
+    }
+
+    createSalePriceHTML(priceInfo) {
+        let html = `<div class="sale-price-container">`;
+        
+        // Current price (prominently displayed)
+        html += `<span class="current-price">${priceInfo.currentPrice}</span>`;
+        
+        // Original price (strikethrough)
+        if (priceInfo.originalPrice) {
+            html += `<span class="original-price">${priceInfo.originalPrice}</span>`;
+        }
+        
+        // Discount information
+        if (priceInfo.discount) {
+            html += `<span class="discount-badge">${priceInfo.discount.formatted}</span>`;
+        }
+        
+        // Sale type badge
+        if (priceInfo.saleType && priceInfo.saleType !== 'general') {
+            html += `<span class="sale-type-badge">${priceInfo.saleType.toUpperCase()}</span>`;
+        }
+        
+        html += `</div>`;
+        return html;
+    }
+
+    extractPriceForStorage(price) {
+        // Extract the current price for storage
+        if (typeof price === 'object' && price !== null) {
+            return price.currentPrice || price.displayText || 'No price found';
+        }
+        return price;
+    }
+
+    extractSaleInfo(price) {
+        // Extract sale information for storage
+        if (typeof price === 'object' && price !== null && price.isOnSale) {
+            return {
+                isOnSale: true,
+                originalPrice: price.originalPrice,
+                discount: price.discount,
+                saleType: price.saleType
+            };
+        }
+        return { isOnSale: false };
     }
     
     showError(message) {
@@ -375,6 +475,7 @@ class ShoppingExtensionPopup {
             
             this.renderProductList(products);
             this.updateListCount(products.length);
+            await this.updateStatistics(products);
         } catch (error) {
             console.error('❌ [Popup] Failed to load saved list:', error);
         }
@@ -490,20 +591,6 @@ class ShoppingExtensionPopup {
         }
     }
     
-    toggleList() {
-        this.listVisible = !this.listVisible;
-        
-        if (this.elements.listContainer && this.elements.listToggle) {
-            if (this.listVisible) {
-                this.elements.listContainer.classList.remove('hidden');
-                this.elements.listToggle.classList.add('expanded');
-            } else {
-                this.elements.listContainer.classList.add('hidden');
-                this.elements.listToggle.classList.remove('expanded');
-            }
-        }
-    }
-    
     async handleClearList() {
         if (!confirm('Are you sure you want to clear all saved products? This action cannot be undone.')) {
             return;
@@ -551,8 +638,245 @@ class ShoppingExtensionPopup {
     }
     
     updateListCount(count) {
-        if (this.elements.listCount) {
-            this.elements.listCount.textContent = count;
+        // The listCount element no longer exists in the new design
+        // This method is kept for compatibility but does nothing
+        console.log('📊 [Popup] Product count:', count);
+    }
+    
+    // ============================================
+    // STATISTICS SECTION
+    // ============================================
+    
+    async updateStatistics(products) {
+        try {
+            // Get tracking data for price drop calculations
+            const trackingData = await this.getTrackingData();
+            
+            // Calculate statistics
+            const totalProducts = products.length;
+            const { totalSaved, totalDrops } = this.calculateSavingsAndDrops(products, trackingData);
+            
+            // Update UI elements
+            this.updateStatElement('totalProducts', totalProducts);
+            this.updateStatElement('totalSaved', `$${totalSaved.toFixed(2)}`);
+            this.updateStatElement('totalDrops', totalDrops);
+            
+        } catch (error) {
+            console.error('❌ [Popup] Failed to update statistics:', error);
+        }
+    }
+    
+    async getTrackingData() {
+        try {
+            const result = await chrome.storage.local.get(['price_tracking_data']);
+            return result.price_tracking_data || {};
+        } catch (error) {
+            console.error('❌ [Popup] Failed to get tracking data:', error);
+            return {};
+        }
+    }
+    
+    calculateSavingsAndDrops(products, trackingData) {
+        let totalSaved = 0;
+        let totalDrops = 0;
+        
+        products.forEach(product => {
+            const productTracking = trackingData[product.id];
+            if (productTracking && productTracking.priceHistory) {
+                // Calculate savings from price drops
+                const history = productTracking.priceHistory;
+                for (let i = 1; i < history.length; i++) {
+                    const currentPrice = this.extractNumericPrice(history[i].price);
+                    const previousPrice = this.extractNumericPrice(history[i-1].price);
+                    
+                    if (currentPrice < previousPrice) {
+                        totalSaved += (previousPrice - currentPrice);
+                        totalDrops++;
+                    }
+                }
+            }
+        });
+        
+        return { totalSaved, totalDrops };
+    }
+    
+    extractNumericPrice(priceString) {
+        if (!priceString) return 0;
+        
+        // Remove currency symbols and extract number
+        const cleanPrice = priceString.replace(/[^\d.,]/g, '');
+        const numericPrice = parseFloat(cleanPrice.replace(',', ''));
+        
+        return isNaN(numericPrice) ? 0 : numericPrice;
+    }
+    
+    updateStatElement(elementId, value) {
+        const element = document.getElementById(elementId);
+        if (element) {
+            element.textContent = value;
+        }
+    }
+    
+    // ============================================
+    // SEARCH AND SORT SECTION
+    // ============================================
+    
+    async handleSearch() {
+        const searchTerm = this.elements.searchInput?.value.toLowerCase().trim() || '';
+        console.log('🔍 [Popup] Searching for:', searchTerm);
+        
+        try {
+            const allProducts = await ExtensionUtils.storage.getProducts();
+            const filteredProducts = this.filterProducts(allProducts, searchTerm);
+            const sortedProducts = this.sortProducts(filteredProducts, this.elements.sortSelect?.value || 'date');
+            
+            this.renderProductList(sortedProducts);
+            await this.updateStatistics(allProducts); // Keep stats for all products
+        } catch (error) {
+            console.error('❌ [Popup] Search failed:', error);
+        }
+    }
+    
+    async handleSort() {
+        const sortBy = this.elements.sortSelect?.value || 'date';
+        const searchTerm = this.elements.searchInput?.value.toLowerCase().trim() || '';
+        console.log('🔄 [Popup] Sorting by:', sortBy);
+        
+        try {
+            const allProducts = await ExtensionUtils.storage.getProducts();
+            const filteredProducts = this.filterProducts(allProducts, searchTerm);
+            const sortedProducts = this.sortProducts(filteredProducts, sortBy);
+            
+            this.renderProductList(sortedProducts);
+        } catch (error) {
+            console.error('❌ [Popup] Sort failed:', error);
+        }
+    }
+    
+    filterProducts(products, searchTerm) {
+        if (!searchTerm) return products;
+        
+        return products.filter(product => {
+            const searchableText = [
+                product.title,
+                product.price,
+                this.extractDomain(product.url)
+            ].join(' ').toLowerCase();
+            
+            return searchableText.includes(searchTerm);
+        });
+    }
+    
+    sortProducts(products, sortBy) {
+        const sortedProducts = [...products];
+        
+        switch (sortBy) {
+            case 'name':
+                sortedProducts.sort((a, b) => a.title.localeCompare(b.title));
+                break;
+            case 'price':
+                sortedProducts.sort((a, b) => {
+                    const priceA = this.extractNumericPrice(a.price);
+                    const priceB = this.extractNumericPrice(b.price);
+                    return priceA - priceB;
+                });
+                break;
+            case 'savings':
+                sortedProducts.sort((a, b) => {
+                    const savingsA = this.calculateProductSavings(a);
+                    const savingsB = this.calculateProductSavings(b);
+                    return savingsB - savingsA; // Highest savings first
+                });
+                break;
+            case 'date':
+            default:
+                sortedProducts.sort((a, b) => new Date(b.dateAdded) - new Date(a.dateAdded));
+                break;
+        }
+        
+        return sortedProducts;
+    }
+    
+    calculateProductSavings(product) {
+        // This would need tracking data to calculate actual savings
+        // For now, return 0 as placeholder
+        return 0;
+    }
+    
+    async handleTrackCurrent() {
+        console.log('➕ [Popup] Track current product clicked');
+        
+        try {
+            this.showLoading();
+            
+            const tab = await ExtensionUtils.chrome.getCurrentTab();
+            if (!tab?.id) {
+                this.showError('No active tab found');
+                return;
+            }
+            
+            console.log('📋 [Popup] Getting current tab info for tracking:', tab.url);
+            const result = await this.getPageInfoFromCurrentTab(tab);
+            
+            // Create product object
+            const product = {
+                title: result.title,
+                price: result.price,
+                url: result.url,
+                dateAdded: new Date().toISOString()
+            };
+            
+            // Generate ID for the product
+            product.id = ExtensionUtils.generateId();
+            
+            // Add to list directly
+            const success = await ExtensionUtils.storage.addProduct(product);
+            
+            if (success) {
+                this.showSuccessMessage('Product tracked successfully!');
+                await this.loadSavedList();
+                this.hideAllSections();
+            } else {
+                this.showError('Failed to track product');
+            }
+            
+        } catch (error) {
+            console.error('❌ [Popup] Track current failed:', error);
+            this.showError(`Failed to track current product: ${error.message}`);
+        }
+    }
+    
+    async handleRefreshPrices() {
+        console.log('🔄 [Popup] Manual price refresh triggered');
+        
+        try {
+            this.showLoading();
+            
+            // Get all products
+            const products = await ExtensionUtils.storage.getProducts();
+            
+            if (products.length === 0) {
+                this.showError('No products to refresh');
+                return;
+            }
+            
+            // Trigger manual price check via background script
+            const response = await chrome.runtime.sendMessage({
+                action: 'manualPriceCheck',
+                products: products
+            });
+            
+            if (response && response.success) {
+                this.showSuccessMessage(`Price check completed for ${products.length} products!`);
+                await this.loadSavedList(); // Refresh the display
+                this.hideAllSections();
+            } else {
+                this.showError('Failed to refresh prices');
+            }
+            
+        } catch (error) {
+            console.error('❌ [Popup] Manual price refresh failed:', error);
+            this.showError(`Failed to refresh prices: ${error.message}`);
         }
     }
     

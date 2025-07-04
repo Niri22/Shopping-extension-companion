@@ -4,7 +4,9 @@
   "description": "WishCart - A modern Chrome extension for smart shopping with wishlist management and automatic price tracking",
   "main": "popup.js",
   "scripts": {
-    "test": "jest",
+    "test": "jest tests/popup.test.js tests/content.test.js tests/utils.test.js tests/integration.test.js",
+    "test:all": "jest",
+    "test:comprehensive": "node tests/simple-runner.js",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "test:verbose": "jest --verbose",
@@ -54,7 +56,10 @@
       }
     },
     "testMatch": [
-      "**/tests/**/*.test.js"
+      "**/tests/popup.test.js",
+      "**/tests/content.test.js",
+      "**/tests/utils.test.js",
+      "**/tests/integration.test.js"
     ]
   },
   "babel": {

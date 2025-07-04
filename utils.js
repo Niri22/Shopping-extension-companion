@@ -5,6 +5,14 @@
 
 const ExtensionUtils = {
     /**
+     * Generates a simple unique ID
+     * @returns {string} - Unique ID
+     */
+    generateId() {
+        return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
+    },
+
+    /**
      * URL utilities for validation and normalization
      */
     url: {
@@ -434,6 +442,16 @@ const ExtensionUtils = {
                 ExtensionUtils.log.error('Failed to export products', error);
                 return '[]';
             }
+        },
+
+        /**
+         * Adds a product to the stored list (alias for saveProduct)
+         * @param {object} product - Product object with title, price, url, domain
+         * @returns {Promise<boolean>} - Success status
+         */
+        async addProduct(product) {
+            console.log('➕ [Storage] Adding product (alias for saveProduct):', product);
+            return await this.saveProduct(product);
         },
         
         /**

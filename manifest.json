@@ -20,7 +20,8 @@
     "activeTab",
     "tabs",
     "storage",
-    "alarms"
+    "alarms",
+    "notifications"
   ],
   "host_permissions": [
     "http://*/*",

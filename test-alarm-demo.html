@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Alarm Demo - WishCart</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .demo-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #fafafa;
+        }
+        .product-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            margin: 10px 0;
+            background: white;
+            border-radius: 5px;
+            border: 1px solid #eee;
+        }
+        .product-info {
+            flex: 1;
+        }
+        .product-title {
+            font-weight: bold;
+            color: #333;
+        }
+        .product-price {
+            color: #e74c3c;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        .product-url {
+            color: #666;
+            font-size: 0.9em;
+        }
+        .instructions {
+            background-color: #e8f4f8;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+            margin: 20px 0;
+        }
+        .warning {
+            background-color: #fff3cd;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #ffc107;
+            margin: 20px 0;
+        }
+        .success {
+            background-color: #d4edda;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #28a745;
+            margin: 20px 0;
+        }
+        .step {
+            margin: 10px 0;
+            padding: 10px;
+            background: white;
+            border-radius: 5px;
+        }
+        .step-number {
+            background: #3498db;
+            color: white;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+        code {
+            background-color: #f8f9fa;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔔 WishCart Test Alarm Demo</h1>
+        
+        <div class="instructions">
+            <h2>📋 Testing Instructions</h2>
+            <p>This demo shows how to test the modified alarm notification feature that checks prices every 5 minutes and notifies when prices remain the same.</p>
+        </div>
+
+        <div class="demo-section">
+            <h3>🎯 Test Scenario</h3>
+            <p><strong>Modified Behavior:</strong></p>
+            <ul>
+                <li>✅ Alarm checks every <strong>5 minutes</strong> (instead of 24 hours)</li>
+                <li>✅ Notifies when price <strong>remains the same</strong> (instead of price drops)</li>
+                <li>✅ Logs detailed information to console</li>
+                <li>✅ Shows desktop notifications (if permissions granted)</li>
+            </ul>
+        </div>
+
+        <div class="demo-section">
+            <h3>🧪 Sample Test Products</h3>
+            <p>Add these sample products to your WishCart to test the alarm system:</p>
+            
+            <div class="product-item">
+                <div class="product-info">
+                    <div class="product-title">Sample Product 1 - Laptop</div>
+                    <div class="product-price">$999.99</div>
+                    <div class="product-url">https://example.com/laptop</div>
+                </div>
+            </div>
+            
+            <div class="product-item">
+                <div class="product-info">
+                    <div class="product-title">Sample Product 2 - Headphones</div>
+                    <div class="product-price">$199.99</div>
+                    <div class="product-url">https://example.com/headphones</div>
+                </div>
+            </div>
+            
+            <div class="product-item">
+                <div class="product-info">
+                    <div class="product-title">Sample Product 3 - Smartphone</div>
+                    <div class="product-price">$799.99</div>
+                    <div class="product-url">https://example.com/smartphone</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h3>🔧 How to Test</h3>
+            
+            <div class="step">
+                <span class="step-number">1</span>
+                <strong>Load the Extension:</strong> Make sure the WishCart extension is loaded in Chrome
+            </div>
+            
+            <div class="step">
+                <span class="step-number">2</span>
+                <strong>Add Products:</strong> Add some products to your WishCart (manually or from real websites)
+            </div>
+            
+            <div class="step">
+                <span class="step-number">3</span>
+                <strong>Manual Test:</strong> Click the "🔔 Test Price Check" button in the popup to trigger immediate check
+            </div>
+            
+            <div class="step">
+                <span class="step-number">4</span>
+                <strong>Wait for Automatic:</strong> Wait 5 minutes for the automatic alarm to trigger
+            </div>
+            
+            <div class="step">
+                <span class="step-number">5</span>
+                <strong>Check Logs:</strong> Open Chrome DevTools → Console → Filter by "PriceTracker" to see logs
+            </div>
+            
+            <div class="step">
+                <span class="step-number">6</span>
+                <strong>Watch Notifications:</strong> Look for desktop notifications when prices remain the same
+            </div>
+        </div>
+
+        <div class="warning">
+            <h3>⚠️ Important Notes</h3>
+            <ul>
+                <li>The alarm system only works when the extension is active</li>
+                <li>Chrome must be running for alarms to trigger</li>
+                <li>Desktop notifications require permission (Chrome will ask)</li>
+                <li>Check the Chrome extension console for detailed logs</li>
+            </ul>
+        </div>
+
+        <div class="success">
+            <h3>✅ Expected Behavior</h3>
+            <p>When the test alarm runs, you should see:</p>
+            <ul>
+                <li>Console logs showing "⏰ Test alarm triggered - checking prices"</li>
+                <li>Individual product checks with current vs. last prices</li>
+                <li>Desktop notifications for products with unchanged prices</li>
+                <li>Updated tracking data in Chrome storage</li>
+            </ul>
+        </div>
+
+        <div class="demo-section">
+            <h3>🔍 Monitoring Console Output</h3>
+            <p>To see the alarm system in action:</p>
+            <ol>
+                <li>Open Chrome DevTools (F12)</li>
+                <li>Go to Console tab</li>
+                <li>Filter by <code>PriceTracker</code></li>
+                <li>Look for messages like:
+                    <ul>
+                        <li><code>✅ [PriceTracker] Test alarm set up - checking every 5 minutes</code></li>
+                        <li><code>⏰ [PriceTracker] Test alarm triggered - checking prices</code></li>
+                        <li><code>🔄 [PriceTracker] Price remained the same - sending notification</code></li>
+                    </ul>
+                </li>
+            </ol>
+        </div>
+
+        <div class="demo-section">
+            <h3>🎛️ Reverting Changes</h3>
+            <p>To revert back to normal 24-hour price drop notifications:</p>
+            <ol>
+                <li>Edit <code>services/PriceTracker.js</code></li>
+                <li>Change <code>delayInMinutes: 5</code> to <code>delayInMinutes: 1440</code></li>
+                <li>Change <code>periodInMinutes: 5</code> to <code>periodInMinutes: 1440</code></li>
+                <li>Modify the logic to check for price drops instead of same prices</li>
+                <li>Reload the extension</li>
+            </ol>
+        </div>
+    </div>
+</body>
+</html> 

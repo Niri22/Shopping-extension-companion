@@ -8,18 +8,29 @@
 </head>
 <body>
     <div class="container">
-        <h1>🛍️ WishCart</h1>
-        
-        <!-- Input section for URL -->
-        <div class="input-section">
-            <label for="urlInput">Enter Product URL:</label>
-            <input type="url" id="urlInput" placeholder="https://amazon.com/product-page" />
-            <button id="fetchBtn" data-action="fetch-info">Get Product Info</button>
-        </div>
-        
-        <!-- Button to get current tab's product info -->
-        <div class="current-tab-section">
-            <button id="currentTabBtn" data-action="current-tab">Get Current Product</button>
+        <!-- Header Banner -->
+        <div class="header-banner">
+            <div class="header-title">
+                <span class="header-icon">🛒</span>
+                <span class="header-text">Price Tracker</span>
+                <button class="settings-btn" id="settingsBtn">⚙️</button>
+            </div>
+            
+            <!-- Statistics Banner -->
+            <div class="stats-banner">
+                <div class="stat-item">
+                    <div class="stat-number" id="totalProducts">0</div>
+                    <div class="stat-label">PRODUCTS</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="totalSaved">$0.00</div>
+                    <div class="stat-label">SAVED</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="totalDrops">0</div>
+                    <div class="stat-label">DROPS</div>
+                </div>
+            </div>
         </div>
         
         <!-- Loading indicator -->
@@ -52,26 +63,42 @@
             <p id="errorText"></p>
         </div>
 
+        <!-- Search and Sort Section -->
+        <div class="search-section">
+            <div class="search-input-wrapper">
+                <input type="text" id="searchInput" placeholder="Search products..." class="search-input">
+            </div>
+            <div class="sort-wrapper">
+                <select id="sortSelect" class="sort-select">
+                    <option value="date">Sort by Date</option>
+                    <option value="name">Sort by Name</option>
+                    <option value="price">Sort by Price</option>
+                    <option value="savings">Sort by Savings</option>
+                </select>
+            </div>
+        </div>
+
         <!-- Saved Products List -->
         <div class="list-section">
             <div class="list-header">
-                <button id="listToggle" class="list-toggle-btn" data-action="toggle-list">
-                    <span id="listCount" class="list-count">0</span> Saved Products
-                    <span class="toggle-icon">▼</span>
-                </button>
+                <h3 class="tracked-products-title">Tracked Products</h3>
+                <div class="header-actions">
+                    <button id="trackCurrentBtn" class="track-current-btn" title="Track Current Product">+</button>
+                    <button id="refreshBtn" class="refresh-icon-btn" title="Refresh Prices">🔄</button>
+                </div>
             </div>
             
-            <div id="listContainer" class="list-container hidden">
-                <div class="list-controls">
-                    <button id="clearListBtn" class="clear-btn" data-action="clear-list">Clear All</button>
-                    <button id="exportListBtn" class="export-btn" data-action="export-list">Export</button>
-                </div>
-                
+            <div id="listContainer" class="list-container">
                 <div id="savedList" class="saved-list">
                                     <div class="empty-list">
                     <p>Your WishCart is empty</p>
                     <p class="hint">Add products using the "Add to WishCart" button above</p>
                 </div>
+                </div>
+                
+                <div class="list-controls">
+                    <button id="clearListBtn" class="clear-btn" data-action="clear-list">Clear All</button>
+                    <button id="exportListBtn" class="export-btn" data-action="export-list">Export</button>
                 </div>
             </div>
         </div>

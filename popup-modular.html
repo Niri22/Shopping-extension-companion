@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WishCart - Modular Architecture</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Header Section with Statistics -->
+    <header class="header">
+        <div class="header-content">
+            <div class="header-main">
+                <h1>WishCart</h1>
+                <div class="header-stats">
+                    <div class="stat-item">
+                        <span class="stat-number" id="totalProducts">0</span>
+                        <span class="stat-label">Products</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="totalSaved">$0.00</span>
+                        <span class="stat-label">Saved</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="totalDrops">0</span>
+                        <span class="stat-label">Drops</span>
+                    </div>
+                </div>
+            </div>
+            <button class="settings-btn" title="Settings">⚙️</button>
+        </div>
+    </header>
+
+    <!-- Search Section -->
+    <section class="search-section">
+        <div class="search-container">
+            <input type="text" id="searchInput" class="search-input" placeholder="Search products...">
+            <select id="sortSelect" class="sort-select">
+                <option value="date">Sort by Date</option>
+                <option value="name">Sort by Name</option>
+                <option value="price">Sort by Price</option>
+                <option value="savings">Sort by Savings</option>
+            </select>
+        </div>
+    </section>
+
+    <!-- Product Tracking Section -->
+    <section class="tracking-section">
+        <div class="tracking-header">
+            <h2>Tracked Products</h2>
+            <div class="tracking-controls">
+                <button id="trackCurrentBtn" class="track-btn" title="Track current page">+</button>
+                <button id="refreshBtn" class="refresh-btn" title="Refresh prices">🔄</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Loading State -->
+    <div id="loading" class="section hidden">
+        <div class="loading-spinner"></div>
+        <p>Loading product information...</p>
+    </div>
+
+    <!-- Error State -->
+    <div id="error" class="section hidden">
+        <div class="error-icon">❌</div>
+        <p id="errorText">An error occurred</p>
+    </div>
+
+    <!-- Result State -->
+    <div id="result" class="section hidden">
+        <div class="result-content">
+            <h3 id="titleText">Product Title</h3>
+            <p class="price" id="priceText">$0.00</p>
+            <p class="url" id="urlText">https://example.com</p>
+            <button id="addToListBtn" class="add-btn">✨ Add to WishCart</button>
+        </div>
+    </div>
+
+    <!-- Product List -->
+    <div id="listContainer" class="list-container">
+        <div id="savedList" class="saved-list">
+            <div class="empty-list">
+                <p>Your WishCart is empty</p>
+                <p class="hint">Add products using the + button above</p>
+            </div>
+        </div>
+        
+        <!-- List Controls at Bottom -->
+        <div class="list-controls">
+            <button id="clearListBtn" class="control-btn clear-btn">🗑️ Clear All</button>
+            <button id="exportListBtn" class="control-btn export-btn">📤 Export</button>
+        </div>
+    </div>
+
+    <!-- Success Message Template -->
+    <div class="success-message-template" style="display: none;">
+        <div class="success-message">
+            <span class="success-icon">✅</span>
+            <span class="success-text">Success!</span>
+        </div>
+    </div>
+
+    <!-- Scripts - Load in dependency order -->
+    
+    <!-- Configuration and Constants -->
+    <script src="config.js"></script>
+    
+    <!-- Utility Modules -->
+    <script src="src/utils/ChromeUtils.js"></script>
+    <script src="src/utils/ValidationUtils.js"></script>
+    <script src="utils.js"></script>
+    
+    <!-- Service Modules -->
+    <script src="src/services/ProductService.js"></script>
+    <script src="src/services/StatisticsService.js"></script>
+    <script src="services/PriceTracker.js"></script>
+    
+    <!-- UI Module -->
+    <script src="src/ui/PopupUI.js"></script>
+    
+    <!-- Core Controller -->
+    <script src="src/core/PopupController.js"></script>
+    
+    <!-- Main Application Entry Point -->
+    <script src="src/popup-main.js"></script>
+</body>
+</html> 

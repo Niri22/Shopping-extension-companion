@@ -9,6 +9,81 @@
     overflow: hidden;
 }
 
+/* Header Banner Styling */
+.header-banner {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px;
+}
+
+.header-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.header-icon {
+    font-size: 20px;
+    margin-right: 8px;
+}
+
+.header-text {
+    font-size: 18px;
+    font-weight: 700;
+    flex: 1;
+}
+
+.settings-btn {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    width: auto;
+    margin: 0;
+    box-shadow: none;
+}
+
+.settings-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: none;
+    box-shadow: none;
+}
+
+/* Statistics Banner */
+.stats-banner {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.stat-item {
+    flex: 1;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 12px 8px;
+    backdrop-filter: blur(10px);
+}
+
+.stat-number {
+    font-size: 18px;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 4px;
+}
+
+.stat-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.8);
+    letter-spacing: 0.5px;
+}
+
 /* Header styling */
 h1 {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -174,6 +249,82 @@ button:active {
     box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
 }
 
+/* Enhanced Sale Price Display */
+.price-text.sale-price {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+    padding: 12px 16px;
+    border-radius: 12px;
+    display: inline-block;
+    box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+}
+
+.sale-price-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
+}
+
+.current-price {
+    font-size: 18px;
+    font-weight: 800;
+    color: inherit;
+    line-height: 1.2;
+}
+
+.original-price {
+    font-size: 14px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: line-through;
+    position: relative;
+}
+
+.original-price::before {
+    content: "was ";
+    font-size: 12px;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.6);
+    text-decoration: none;
+}
+
+.discount-badge {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sale-type-badge {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: white;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    box-shadow: 0 1px 2px rgba(245, 158, 11, 0.3);
+}
+
+/* Enhanced item price display for sale items */
+.item-price.on-sale {
+    color: #dc2626;
+    font-weight: 700;
+}
+
+.item-price.on-sale::after {
+    content: "🏷️";
+    margin-left: 4px;
+    font-size: 12px;
+}
+
 .url-text {
     color: #6b7280;
     font-size: 12px;
@@ -200,6 +351,141 @@ button:active {
 /* Hidden class for show/hide functionality */
 .hidden {
     display: none;
+}
+
+/* Search and Sort Section */
+.search-section {
+    margin: 20px;
+    padding: 20px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.search-input-wrapper {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.search-input {
+    flex: 1;
+    padding: 10px 14px;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 14px;
+    background: #f9fafb;
+    transition: all 0.2s ease;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: #6366f1;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.sort-wrapper {
+    display: flex;
+    align-items: center;
+}
+
+.sort-select {
+    flex: 1;
+    padding: 10px 14px;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 14px;
+    background: #f9fafb;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.sort-select:focus {
+    outline: none;
+    border-color: #6366f1;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.list-header {
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 4px;
+}
+
+.tracked-products-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #374151;
+    margin: 0;
+}
+
+.header-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.track-current-btn {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    width: auto;
+    margin: 0;
+    box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
+    min-width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.track-current-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(16, 185, 129, 0.4);
+}
+
+.track-current-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
+}
+
+.refresh-icon-btn {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    width: auto;
+    margin: 0;
+    box-shadow: 0 2px 4px rgba(99, 102, 241, 0.3);
+    min-width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.refresh-icon-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(99, 102, 241, 0.4);
+}
+
+.refresh-icon-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(99, 102, 241, 0.3);
 }
 
 /* Action buttons */
@@ -309,9 +595,10 @@ button:active {
 .list-controls {
     padding: 16px;
     background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
-    border-bottom: 1px solid #e5e7eb;
+    border-top: 1px solid #e5e7eb;
     display: flex;
     gap: 12px;
+    flex-wrap: wrap;
 }
 
 .clear-btn, .export-btn {
